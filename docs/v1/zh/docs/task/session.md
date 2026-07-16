@@ -327,7 +327,7 @@ rm -rf ~/.agentscope/sessions/*.json
 如果需要保留历史对话数据，可以编写迁移脚本：
 
 ```java
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.session.JsonSession;

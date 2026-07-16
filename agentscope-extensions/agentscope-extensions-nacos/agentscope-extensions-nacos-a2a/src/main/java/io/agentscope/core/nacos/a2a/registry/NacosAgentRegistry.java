@@ -21,9 +21,6 @@ import com.alibaba.nacos.api.ai.AiService;
 import com.alibaba.nacos.api.ai.constant.AiConstants;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.common.utils.StringUtils;
-import io.a2a.spec.AgentCard;
-import io.a2a.spec.AgentInterface;
-import io.agentscope.core.a2a.agent.utils.LoggerUtil;
 import io.agentscope.core.a2a.server.registry.AgentRegistry;
 import io.agentscope.core.a2a.server.transport.TransportProperties;
 import io.agentscope.core.nacos.a2a.registry.constants.Constants;
@@ -33,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.a2aproject.sdk.spec.AgentCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

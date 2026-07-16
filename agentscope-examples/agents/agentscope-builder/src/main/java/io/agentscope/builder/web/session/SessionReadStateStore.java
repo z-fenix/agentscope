@@ -15,9 +15,9 @@
  */
 package io.agentscope.builder.web.session;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import io.agentscope.builder.runtime.BuilderBootstrap;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

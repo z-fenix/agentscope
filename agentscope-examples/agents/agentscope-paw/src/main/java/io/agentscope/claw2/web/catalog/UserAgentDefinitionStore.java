@@ -17,9 +17,9 @@ package io.agentscope.claw2.web.catalog;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import io.agentscope.claw2.runtime.ClawBootstrap;
 import io.agentscope.claw2.runtime.config.AgentConfigEntry;
 import java.io.IOException;
@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * User-defined agent catalog backed by a single JSON file at {@code ${clawHome}/agents.json}.
@@ -53,7 +54,7 @@ public final class UserAgentDefinitionStore {
 
     private static final Logger log = LoggerFactory.getLogger(UserAgentDefinitionStore.class);
     private static final ObjectMapper MAPPER =
-            new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+            JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
     private final Path storeFile;
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();

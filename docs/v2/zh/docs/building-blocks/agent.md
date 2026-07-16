@@ -552,8 +552,8 @@ Map<String, Object> map = (Map<String, Object>) result.getMetadata().get("_struc
 如果不想定义 Java 类，可以直接传 JSON Schema：
 
 ```java
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 ObjectMapper om = new ObjectMapper();
 JsonNode schema = om.readTree("""

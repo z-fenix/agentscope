@@ -16,7 +16,8 @@
 package io.agentscope.claw2.web.template;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.claw2.runtime.ClawBootstrap;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
@@ -192,7 +193,7 @@ public class TemplateRegistry {
                                         return;
                                     }
                                     out.add(new CwdTemplate(meta, child));
-                                } catch (IOException e) {
+                                } catch (JacksonException e) {
                                     log.warn(
                                             "Failed to read cwd template {}: {}",
                                             child,
@@ -217,7 +218,7 @@ public class TemplateRegistry {
                 meta = new TemplateMetadata(id, meta.name(), meta.description(), meta.tags());
             }
             return Optional.of(new CwdTemplate(meta, dir));
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to read cwd template {}: {}", manifest, e.getMessage());
             return Optional.empty();
         }

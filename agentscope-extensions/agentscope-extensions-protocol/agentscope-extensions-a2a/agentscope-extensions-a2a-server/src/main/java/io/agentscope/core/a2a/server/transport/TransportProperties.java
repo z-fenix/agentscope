@@ -18,11 +18,12 @@ package io.agentscope.core.a2a.server.transport;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.a2aproject.sdk.spec.AgentCard;
 
 /**
  * Properties for transports.
  *
- * <p>Usage for auto-generate {@link io.a2a.spec.AgentCard} and do register to A2A Registries.
+ * <p>Usage for auto-generate {@link AgentCard} and do register to A2A Registries.
  */
 public record TransportProperties(
         String transportType,

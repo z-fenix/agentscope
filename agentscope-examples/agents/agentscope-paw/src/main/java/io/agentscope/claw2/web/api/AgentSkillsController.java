@@ -16,7 +16,7 @@
 package io.agentscope.claw2.web.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.claw2.marketplace.ClawMarketplace;
 import io.agentscope.claw2.marketplace.ClawMarketplaceRegistry;
 import io.agentscope.claw2.marketplace.MarketSkillContent;

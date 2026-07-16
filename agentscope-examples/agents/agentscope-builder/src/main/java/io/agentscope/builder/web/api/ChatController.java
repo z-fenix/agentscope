@@ -15,8 +15,8 @@
  */
 package io.agentscope.builder.web.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.builder.runtime.BuilderBootstrap;
 import io.agentscope.builder.runtime.session.SessionAgentManager;
 import io.agentscope.builder.runtime.session.SessionEntry;
@@ -271,7 +271,7 @@ public class ChatController {
             String payload;
             try {
                 payload = MAPPER.writeValueAsString(e.data());
-            } catch (JsonProcessingException ex) {
+            } catch (JacksonException ex) {
                 payload = String.valueOf(e.data());
             }
             data.put(isResult ? "toolResult" : "toolInput", payload);
@@ -454,7 +454,7 @@ public class ChatController {
         String json;
         try {
             json = MAPPER.writeValueAsString(data);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             json = "{\"type\":\"" + eventType + "\"}";
         }
         return ServerSentEvent.<String>builder().event(eventType).data(json).build();

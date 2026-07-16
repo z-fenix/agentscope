@@ -552,8 +552,8 @@ Map<String, Object> map = (Map<String, Object>) result.getMetadata().get("_struc
 If you prefer not to define a Java class, pass a raw JSON Schema:
 
 ```java
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 ObjectMapper om = new ObjectMapper();
 JsonNode schema = om.readTree("""

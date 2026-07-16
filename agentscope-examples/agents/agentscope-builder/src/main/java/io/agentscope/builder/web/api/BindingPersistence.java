@@ -15,9 +15,9 @@
  */
 package io.agentscope.builder.web.api;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import io.agentscope.builder.runtime.BuilderBootstrap;
 import io.agentscope.builder.runtime.config.AgentscopeConfig;
 import io.agentscope.builder.runtime.config.BindingConfigEntry;

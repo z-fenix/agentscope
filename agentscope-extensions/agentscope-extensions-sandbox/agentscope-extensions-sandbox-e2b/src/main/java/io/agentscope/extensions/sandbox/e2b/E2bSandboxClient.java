@@ -15,7 +15,7 @@
  */
 package io.agentscope.extensions.sandbox.e2b;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.harness.agent.sandbox.Sandbox;
 import io.agentscope.harness.agent.sandbox.SandboxClient;
 import io.agentscope.harness.agent.sandbox.SandboxException;
@@ -26,6 +26,7 @@ import io.agentscope.harness.agent.sandbox.snapshot.SandboxSnapshotSpec;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 /** {@link SandboxClient} for E2B. */
 public class E2bSandboxClient implements SandboxClient<E2bSandboxClientOptions> {
@@ -45,10 +46,9 @@ public class E2bSandboxClient implements SandboxClient<E2bSandboxClientOptions> 
         this.objectMapper =
                 objectMapper != null
                         ? objectMapper
-                        : new ObjectMapper()
-                                .findAndRegisterModules()
-                                .registerModule(new HarnessSandboxJacksonModule())
-                                .registerModule(new E2bHarnessSandboxJacksonModule());
+                        : JsonMapper.builder()
+                                .addModule(new HarnessSandboxJacksonModule())
+                                .addModule(new E2bHarnessSandboxJacksonModule()).build();
     }
 
     @Override

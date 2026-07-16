@@ -178,7 +178,7 @@ class AsyncToolMiddlewareTest {
             }
 
             @Override
-            public Mono<Msg> call(List<Msg> msgs, com.fasterxml.jackson.databind.JsonNode schema) {
+            public Mono<Msg> call(List<Msg> msgs, tools.jackson.databind.JsonNode schema) {
                 return Mono.empty();
             }
 
@@ -198,7 +198,7 @@ class AsyncToolMiddlewareTest {
             public Flux<io.agentscope.core.agent.Event> stream(
                     List<Msg> msgs,
                     io.agentscope.core.agent.StreamOptions options,
-                    com.fasterxml.jackson.databind.JsonNode schema) {
+                    tools.jackson.databind.JsonNode schema) {
                 return Flux.empty();
             }
 

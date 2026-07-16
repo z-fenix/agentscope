@@ -16,22 +16,24 @@
 
 package io.agentscope.core.a2a.server.request;
 
-import io.a2a.server.agentexecution.AgentExecutor;
-import io.a2a.server.events.InMemoryQueueManager;
-import io.a2a.server.events.QueueManager;
-import io.a2a.server.requesthandlers.DefaultRequestHandler;
-import io.a2a.server.requesthandlers.RequestHandler;
-import io.a2a.server.tasks.BasePushNotificationSender;
-import io.a2a.server.tasks.InMemoryPushNotificationConfigStore;
-import io.a2a.server.tasks.InMemoryTaskStore;
-import io.a2a.server.tasks.PushNotificationConfigStore;
-import io.a2a.server.tasks.PushNotificationSender;
-import io.a2a.server.tasks.TaskStateProvider;
-import io.a2a.server.tasks.TaskStore;
-import io.a2a.spec.Task;
+
 import java.lang.reflect.Field;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import org.a2aproject.sdk.server.agentexecution.AgentExecutor;
+import org.a2aproject.sdk.server.events.InMemoryQueueManager;
+import org.a2aproject.sdk.server.events.QueueManager;
+import org.a2aproject.sdk.server.requesthandlers.DefaultRequestHandler;
+import org.a2aproject.sdk.server.requesthandlers.RequestHandler;
+import org.a2aproject.sdk.server.tasks.BasePushNotificationSender;
+import org.a2aproject.sdk.server.tasks.InMemoryPushNotificationConfigStore;
+import org.a2aproject.sdk.server.tasks.InMemoryTaskStore;
+import org.a2aproject.sdk.server.tasks.PushNotificationConfigStore;
+import org.a2aproject.sdk.server.tasks.PushNotificationSender;
+import org.a2aproject.sdk.server.tasks.TaskStateProvider;
+import org.a2aproject.sdk.server.tasks.TaskStore;
+import org.a2aproject.sdk.spec.Task;
+import org.jspecify.annotations.NonNull;
 
 /**
  * The Wrapper for Default {@link RequestHandler} implementation.
@@ -157,21 +159,17 @@ public class AgentScopeA2aRequestHandler extends DefaultRequestHandler implement
                 return false;
             }
             // Task is active if not in final state
-            return task.getStatus() == null
-                    || task.getStatus().state() == null
-                    || !task.getStatus().state().isFinal();
+            return !task.status().state().isFinal();
         }
 
         @Override
-        public boolean isTaskFinalized(String taskId) {
+        public boolean isTaskFinalized(@NonNull String taskId) {
             Task task = taskStore.get(taskId);
             if (task == null) {
                 return false;
             }
             // Task is finalized if in final state (ignores grace period)
-            return task.getStatus() != null
-                    && task.getStatus().state() != null
-                    && task.getStatus().state().isFinal();
+            return task.status().state().isFinal();
         }
     }
 }

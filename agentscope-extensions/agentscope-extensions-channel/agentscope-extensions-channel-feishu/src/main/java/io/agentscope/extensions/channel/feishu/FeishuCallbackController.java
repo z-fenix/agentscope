@@ -15,8 +15,8 @@
  */
 package io.agentscope.extensions.channel.feishu;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.harness.agent.gateway.channel.InboundMessage;
 import java.util.Map;
 import java.util.Objects;

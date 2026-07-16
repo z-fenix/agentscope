@@ -16,8 +16,8 @@
 package io.agentscope.builder.web.identity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -180,7 +180,7 @@ public class IdentityLinkStore {
             ObjectMapper m =
                     MAPPER.copy()
                             .enable(
-                                    com.fasterxml.jackson.databind.SerializationFeature
+                                    tools.jackson.databind.SerializationFeature
                                             .INDENT_OUTPUT);
             m.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             Path tmp = file.resolveSibling(file.getFileName() + ".tmp");

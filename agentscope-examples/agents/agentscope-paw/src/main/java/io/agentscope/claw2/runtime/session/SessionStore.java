@@ -16,9 +16,9 @@
 package io.agentscope.claw2.runtime.session;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Durable session registry backed by a JSON file ({@code sessions.json}) that tracks session
@@ -48,7 +49,7 @@ public final class SessionStore {
 
     private static final Logger log = LoggerFactory.getLogger(SessionStore.class);
     private static final ObjectMapper MAPPER =
-            new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+           JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
     private final Path storeFile;
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();

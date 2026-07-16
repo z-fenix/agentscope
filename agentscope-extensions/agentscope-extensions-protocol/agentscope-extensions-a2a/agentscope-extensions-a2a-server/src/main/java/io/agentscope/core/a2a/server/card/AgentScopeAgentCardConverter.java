@@ -16,15 +16,15 @@
 
 package io.agentscope.core.a2a.server.card;
 
-import io.a2a.spec.AgentCapabilities;
-import io.a2a.spec.AgentCard;
-import io.a2a.spec.AgentInterface;
-import io.a2a.spec.TransportProtocol;
 import io.agentscope.core.a2a.server.executor.runner.AgentRunner;
 import io.agentscope.core.a2a.server.transport.TransportProperties;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.a2aproject.sdk.spec.AgentCapabilities;
+import org.a2aproject.sdk.spec.AgentCard;
+import org.a2aproject.sdk.spec.AgentInterface;
+import org.a2aproject.sdk.spec.TransportProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,9 +75,9 @@ public class AgentScopeAgentCardConverter {
                 createAdditionalInterfaces(agentCard, availableTransports);
         AgentInterface preferredTransportInterface =
                 getPreferredTransport(agentCard, additionalInterfaces);
-        AgentCard.Builder agentCardBuilder = new AgentCard.Builder();
+        AgentCard.Builder agentCardBuilder = AgentCard.builder();
         if (null != preferredTransportInterface) {
-            agentCardBuilder.preferredTransport(preferredTransportInterface.transport());
+            agentCardBuilder.preferredTransport(preferredTransportInterface.protocolBinding());
             agentCardBuilder.url(preferredTransportInterface.url());
         }
         return agentCardBuilder
@@ -90,20 +90,20 @@ public class AgentScopeAgentCardConverter {
                 .defaultInputModes(getModes(agentCard.getDefaultInputModes()))
                 .defaultOutputModes(getModes(agentCard.getDefaultOutputModes()))
                 .skills(null != agentCard.getSkills() ? agentCard.getSkills() : List.of())
-                .supportsAuthenticatedExtendedCard(false)
+                //.supportsAuthenticatedExtendedCard(false)
                 .securitySchemes(agentCard.getSecuritySchemes())
-                .security(agentCard.getSecurity())
+                //.security(agentCard.getSecurity())
                 .iconUrl(agentCard.getIconUrl())
-                .additionalInterfaces(additionalInterfaces)
-                .protocolVersion("0.3.0")
+                .supportedInterfaces(additionalInterfaces)
+                .version("1.0.0")
                 .build();
     }
 
     private AgentCapabilities createDefaultCapabilities() {
-        return new AgentCapabilities.Builder()
+        return AgentCapabilities.builder()
                 .streaming(true)
                 .pushNotifications(false)
-                .stateTransitionHistory(false)
+                //.stateTransitionHistory(false)
                 .build();
     }
 
@@ -130,7 +130,7 @@ public class AgentScopeAgentCardConverter {
                                 transport ->
                                         TransportProtocol.JSONRPC
                                                 .asString()
-                                                .equals(transport.transport()))
+                                                .equals(transport.protocolBinding()))
                         .findFirst();
         return result.orElseGet(
                 () -> {

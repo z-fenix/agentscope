@@ -1,15 +1,15 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
   application:
     name: agentscope-dataagent
   webflux:
     static-path-pattern: /**
-  resources:
-    static-locations:
-      - classpath:/static/
-
+  web:
+    resources:
+      static-locations:
+        - classpath:/static/
   # --------------------------------------------------------------------------
   # User + agent metadata are persisted via Spring Data JPA. The default
   # backend is an embedded H2 database written to
@@ -61,6 +61,7 @@ spring:
       mode: ${DATAAGENT_SQL_INIT_MODE:always}
       platform: ${DATAAGENT_SQL_INIT_PLATFORM:h2}
       continue-on-error: false
+
 
 # --------------------------------------------------------------------------
 # agentscope-dataagent configuration
@@ -119,10 +120,10 @@ dataagent:
   # to local file store when disabled.
   session:
     redis:
-      enabled: false
-      host: localhost
-      port: 6379
-      password:
+      enabled: true
+      host: 192.168.88.79
+      port: 6381
+      password: zq123456
       database: 0
       key-prefix: "dataagent:session:"
 

@@ -34,8 +34,8 @@ import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest5_client.Rest5ClientTransport;
 import co.elastic.clients.transport.rest5_client.low_level.Rest5Client;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.core.message.ContentBlock;
 import io.agentscope.core.message.TextBlock;
 import io.agentscope.core.rag.exception.VectorStoreException;
@@ -156,7 +156,7 @@ public class ElasticsearchStore implements VDBStoreBase, AutoCloseable {
 
             // 2. Create Transport and Client
             this.transport =
-                    new Rest5ClientTransport(restClient, new JacksonJsonpMapper(OBJECT_MAPPER));
+                    new Rest5ClientTransport(restClient, new JacksonJsonpMapper());
             this.client = new ElasticsearchClient(transport);
 
             // 3. Ensure Index Exists

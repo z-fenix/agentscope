@@ -16,8 +16,6 @@
 package io.agentscope.dataagent.web.identity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -30,6 +28,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Persistent registry that maps a claw {@code userId} to that user's identity on other channels
@@ -56,140 +58,160 @@ import org.slf4j.LoggerFactory;
  */
 public class IdentityLinkStore {
 
-    private static final Logger log = LoggerFactory.getLogger(IdentityLinkStore.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final Logger log = LoggerFactory.getLogger(IdentityLinkStore.class);
+  private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
-    private final Path file;
-    private final ReentrantLock writeLock = new ReentrantLock();
-    private final ConcurrentHashMap<String, Map<String, String>> byUser = new ConcurrentHashMap<>();
+  private final Path file;
+  private final ReentrantLock writeLock = new ReentrantLock();
+  private final ConcurrentHashMap<String, Map<String, String>> byUser = new ConcurrentHashMap<>();
 
-    public IdentityLinkStore(Path agentscopeDir) {
-        this.file = agentscopeDir.resolve("identity-links.json");
-        load();
+  public IdentityLinkStore(Path agentscopeDir) {
+    this.file = agentscopeDir.resolve("identity-links.json");
+    load();
+  }
+
+  // -----------------------------------------------------------------
+  //  Query
+  // -----------------------------------------------------------------
+
+  /**
+   * Returns a snapshot of the entire user → channel → externalId map.
+   */
+  public Map<String, Map<String, String>> snapshot() {
+    Map<String, Map<String, String>> out = new LinkedHashMap<>();
+    byUser.forEach((u, m) -> out.put(u, new LinkedHashMap<>(m)));
+    return out;
+  }
+
+  /**
+   * Returns the user's channel links, or an empty map when none exist.
+   */
+  public Map<String, String> linksFor(String userId) {
+    return new LinkedHashMap<>(byUser.getOrDefault(userId, Map.of()));
+  }
+
+  /**
+   * Resolves the external identity for {@code userId} on {@code channelId}.
+   */
+  public Optional<String> externalIdFor(String userId, String channelId) {
+    Map<String, String> m = byUser.get(userId);
+    if (m == null) {
+      return Optional.empty();
     }
+    return Optional.ofNullable(m.get(channelId));
+  }
 
-    // -----------------------------------------------------------------
-    //  Query
-    // -----------------------------------------------------------------
-
-    /** Returns a snapshot of the entire user → channel → externalId map. */
-    public Map<String, Map<String, String>> snapshot() {
-        Map<String, Map<String, String>> out = new LinkedHashMap<>();
-        byUser.forEach((u, m) -> out.put(u, new LinkedHashMap<>(m)));
-        return out;
+  /**
+   * Reverse lookup: returns the claw {@code userId} whose link for {@code channelId} matches
+   * {@code externalId}. Useful for inbound delivery to translate a channel-native id into the
+   * canonical user id.
+   */
+  public Optional<String> userIdByExternal(String channelId, String externalId) {
+    if (channelId == null || externalId == null) {
+      return Optional.empty();
     }
-
-    /** Returns the user's channel links, or an empty map when none exist. */
-    public Map<String, String> linksFor(String userId) {
-        return new LinkedHashMap<>(byUser.getOrDefault(userId, Map.of()));
+    for (var entry : byUser.entrySet()) {
+      if (externalId.equals(entry.getValue().get(channelId))) {
+        return Optional.of(entry.getKey());
+      }
     }
+    return Optional.empty();
+  }
 
-    /** Resolves the external identity for {@code userId} on {@code channelId}. */
-    public Optional<String> externalIdFor(String userId, String channelId) {
-        Map<String, String> m = byUser.get(userId);
-        if (m == null) return Optional.empty();
-        return Optional.ofNullable(m.get(channelId));
+  // -----------------------------------------------------------------
+  //  Mutations
+  // -----------------------------------------------------------------
+
+  /**
+   * Records that {@code userId} is known as {@code externalId} on {@code channelId}. Replaces any
+   * prior value for the same (user, channel) pair.
+   */
+  public void link(String userId, String channelId, String externalId) {
+    if (userId == null || channelId == null || externalId == null) {
+      throw new IllegalArgumentException("userId, channelId, externalId are required");
     }
+    writeLock.lock();
+    try {
+      Map<String, String> links = byUser.computeIfAbsent(userId, k -> new LinkedHashMap<>());
+      synchronized (links) {
+        links.put(channelId, externalId);
+      }
+      persist();
+      log.info(
+          "Identity link added: user={}, channel={}, externalId={}",
+          userId,
+          channelId,
+          externalId);
+    } finally {
+      writeLock.unlock();
+    }
+  }
 
-    /**
-     * Reverse lookup: returns the claw {@code userId} whose link for {@code channelId} matches
-     * {@code externalId}. Useful for inbound delivery to translate a channel-native id into the
-     * canonical user id.
-     */
-    public Optional<String> userIdByExternal(String channelId, String externalId) {
-        if (channelId == null || externalId == null) return Optional.empty();
-        for (var entry : byUser.entrySet()) {
-            if (externalId.equals(entry.getValue().get(channelId))) {
-                return Optional.of(entry.getKey());
-            }
+  /**
+   * Removes the link for {@code (userId, channelId)} if present.
+   */
+  public boolean unlink(String userId, String channelId) {
+    writeLock.lock();
+    try {
+      Map<String, String> links = byUser.get(userId);
+      if (links == null) {
+        return false;
+      }
+      String removed;
+      synchronized (links) {
+        removed = links.remove(channelId);
+        if (links.isEmpty()) {
+          byUser.remove(userId);
         }
-        return Optional.empty();
+      }
+      if (removed != null) {
+        persist();
+        return true;
+      }
+      return false;
+    } finally {
+      writeLock.unlock();
     }
+  }
 
-    // -----------------------------------------------------------------
-    //  Mutations
-    // -----------------------------------------------------------------
+  // -----------------------------------------------------------------
+  //  Persistence
+  // -----------------------------------------------------------------
 
-    /**
-     * Records that {@code userId} is known as {@code externalId} on {@code channelId}. Replaces
-     * any prior value for the same (user, channel) pair.
-     */
-    public void link(String userId, String channelId, String externalId) {
-        if (userId == null || channelId == null || externalId == null) {
-            throw new IllegalArgumentException("userId, channelId, externalId are required");
-        }
-        writeLock.lock();
-        try {
-            Map<String, String> links = byUser.computeIfAbsent(userId, k -> new LinkedHashMap<>());
-            synchronized (links) {
-                links.put(channelId, externalId);
-            }
-            persist();
-            log.info(
-                    "Identity link added: user={}, channel={}, externalId={}",
-                    userId,
-                    channelId,
-                    externalId);
-        } finally {
-            writeLock.unlock();
-        }
+  private void load() {
+    if (!Files.isRegularFile(file)) {
+      return;
     }
-
-    /** Removes the link for {@code (userId, channelId)} if present. */
-    public boolean unlink(String userId, String channelId) {
-        writeLock.lock();
-        try {
-            Map<String, String> links = byUser.get(userId);
-            if (links == null) return false;
-            String removed;
-            synchronized (links) {
-                removed = links.remove(channelId);
-                if (links.isEmpty()) byUser.remove(userId);
-            }
-            if (removed != null) {
-                persist();
-                return true;
-            }
-            return false;
-        } finally {
-            writeLock.unlock();
-        }
+    try {
+      String json = Files.readString(file, StandardCharsets.UTF_8);
+      Map<String, Map<String, String>> data =
+          MAPPER.readValue(
+              json, new TypeReference<Map<String, Map<String, String>>>() {
+              });
+      data.forEach((u, m) -> byUser.put(u, new LinkedHashMap<>(m)));
+      log.info("Loaded {} identity-link records from {}", byUser.size(), file);
+    } catch (IOException e) {
+      log.warn("Failed to load identity-links from {}: {}", file, e.getMessage());
     }
+  }
 
-    // -----------------------------------------------------------------
-    //  Persistence
-    // -----------------------------------------------------------------
+  private void persist() {
+    try {
+      Files.createDirectories(file.getParent());
 
-    private void load() {
-        if (!Files.isRegularFile(file)) return;
-        try {
-            String json = Files.readString(file, StandardCharsets.UTF_8);
-            Map<String, Map<String, String>> data =
-                    MAPPER.readValue(
-                            json, new TypeReference<Map<String, Map<String, String>>>() {});
-            data.forEach((u, m) -> byUser.put(u, new LinkedHashMap<>(m)));
-            log.info("Loaded {} identity-link records from {}", byUser.size(), file);
-        } catch (IOException e) {
-            log.warn("Failed to load identity-links from {}: {}", file, e.getMessage());
-        }
+      ObjectMapper m = JsonMapper.builder()
+          .enable(
+              SerializationFeature
+                  .INDENT_OUTPUT)
+          .changeDefaultPropertyInclusion(h -> h.withValueInclusion(JsonInclude.Include.NON_NULL))
+          .build();
+      Path tmp = file.resolveSibling(file.getFileName() + ".tmp");
+      Files.writeString(tmp, m.writeValueAsString(snapshot()), StandardCharsets.UTF_8);
+      Files.move(
+          tmp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+    } catch (IOException e) {
+      log.error("Failed to persist identity-links: {}", e.getMessage());
+      throw new RuntimeException(e);
     }
-
-    private void persist() {
-        try {
-            Files.createDirectories(file.getParent());
-            ObjectMapper m =
-                    MAPPER.copy()
-                            .enable(
-                                    com.fasterxml.jackson.databind.SerializationFeature
-                                            .INDENT_OUTPUT);
-            m.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            Path tmp = file.resolveSibling(file.getFileName() + ".tmp");
-            Files.writeString(tmp, m.writeValueAsString(snapshot()), StandardCharsets.UTF_8);
-            Files.move(
-                    tmp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        } catch (IOException e) {
-            log.error("Failed to persist identity-links: {}", e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
+  }
 }

@@ -6,9 +6,10 @@ spring:
     name: agentscope-builder
   webflux:
     static-path-pattern: /**
-  resources:
-    static-locations:
-      - classpath:/static/
+  web:
+    resources:
+      static-locations:
+        - classpath:/static/
 
   # --------------------------------------------------------------------------
   # User + agent metadata are persisted via Spring Data JPA. The default backend

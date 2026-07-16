@@ -15,7 +15,7 @@
  */
 package io.agentscope.dataagent.runtime.channel.webhook;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.dataagent.runtime.DataAgentBootstrap;
 import java.util.List;
 import java.util.Map;

@@ -27,8 +27,7 @@ import io.agentscope.harness.agent.sandbox.snapshot.SandboxSnapshot;
  * the workspace was fully initialized at the last stop.
  *
  * <p>Concrete subtypes are registered for Jackson via {@link
- * io.agentscope.harness.agent.sandbox.json.HarnessSandboxJacksonModule} (and optional {@link
- * com.fasterxml.jackson.databind.ObjectMapper#registerSubtypes} for extension types), not via
+ * io.agentscope.harness.agent.sandbox.json.HarnessSandboxJacksonModule} (and optional  for extension types), not via
  * {@code @JsonSubTypes} on this class.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")

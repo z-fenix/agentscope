@@ -15,9 +15,9 @@
  */
 package io.agentscope.builder.web.persistence.jpa;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.builder.runtime.config.SkillRepositoryConfigEntry;
 import io.agentscope.builder.web.catalog.UserAgentDefinitionStore;
 import io.agentscope.builder.web.share.AgentShareGrant;

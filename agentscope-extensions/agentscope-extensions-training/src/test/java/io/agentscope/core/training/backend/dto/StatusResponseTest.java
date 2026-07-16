@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +33,7 @@ class StatusResponseTest {
 
     @Test
     @DisplayName("Should deserialize from JSON")
-    void shouldDeserializeFromJson() throws JsonProcessingException {
+    void shouldDeserializeFromJson() throws JacksonException {
         // Arrange
         String json = "{\"status\": \"success\", \"message\": \"OK\"}";
 
@@ -49,7 +49,7 @@ class StatusResponseTest {
 
     @Test
     @DisplayName("Should deserialize error response")
-    void shouldDeserializeErrorResponse() throws JsonProcessingException {
+    void shouldDeserializeErrorResponse() throws JacksonException {
         // Arrange
         String json = "{\"status\": \"error\", \"message\": \"Internal Server Error\"}";
 

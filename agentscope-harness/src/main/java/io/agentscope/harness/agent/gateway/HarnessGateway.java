@@ -531,7 +531,7 @@ public final class HarnessGateway implements Gateway, WakeupDispatcher.WakeupTar
                     io.agentscope.core.util.JsonUtils.getJsonCodec()
                             .convertValue(
                                     event,
-                                    new com.fasterxml.jackson.core.type.TypeReference<
+                                    new tools.jackson.core.type.TypeReference<
                                             Map<String, Object>>() {});
             messageBus.sessionPublishEvent(sessionId, payload).subscribe();
         } catch (Exception e) {

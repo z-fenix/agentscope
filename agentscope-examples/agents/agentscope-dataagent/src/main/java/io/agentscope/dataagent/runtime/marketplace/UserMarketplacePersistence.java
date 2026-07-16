@@ -15,8 +15,8 @@
  */
 package io.agentscope.dataagent.runtime.marketplace;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.dataagent.runtime.config.MarketplaceConfigEntry;
 import io.agentscope.dataagent.web.persistence.jpa.UserMarketplaceEntity;
 import io.agentscope.dataagent.web.persistence.jpa.UserMarketplaceRepository;

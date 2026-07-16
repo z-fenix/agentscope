@@ -16,38 +16,14 @@
 
 package io.agentscope.core.a2a.server.transport.jsonrpc;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import io.a2a.server.ServerCallContext;
-import io.a2a.spec.CancelTaskRequest;
-import io.a2a.spec.DeleteTaskPushNotificationConfigRequest;
-import io.a2a.spec.GetTaskPushNotificationConfigRequest;
-import io.a2a.spec.GetTaskRequest;
-import io.a2a.spec.IdJsonMappingException;
-import io.a2a.spec.InternalError;
-import io.a2a.spec.InvalidParamsError;
-import io.a2a.spec.InvalidParamsJsonMappingException;
-import io.a2a.spec.InvalidRequestError;
-import io.a2a.spec.JSONParseError;
-import io.a2a.spec.JSONRPCError;
-import io.a2a.spec.JSONRPCErrorResponse;
-import io.a2a.spec.JSONRPCRequest;
-import io.a2a.spec.JSONRPCResponse;
-import io.a2a.spec.ListTaskPushNotificationConfigRequest;
-import io.a2a.spec.MethodNotFoundError;
-import io.a2a.spec.MethodNotFoundJsonMappingException;
-import io.a2a.spec.NonStreamingJSONRPCRequest;
-import io.a2a.spec.SendMessageRequest;
-import io.a2a.spec.SendStreamingMessageRequest;
-import io.a2a.spec.SetTaskPushNotificationConfigRequest;
-import io.a2a.spec.StreamingJSONRPCRequest;
-import io.a2a.spec.TaskResubscriptionRequest;
-import io.a2a.spec.TransportProtocol;
-import io.a2a.spec.UnsupportedOperationError;
-import io.a2a.transport.jsonrpc.context.JSONRPCContextKeys;
-import io.a2a.transport.jsonrpc.handler.JSONRPCHandler;
-import io.a2a.util.Utils;
+
+import org.a2aproject.sdk.jsonrpc.common.wrappers.SendStreamingMessageRequest;
+import org.a2aproject.sdk.server.ServerCallContext;
+import org.a2aproject.sdk.spec.TransportProtocol;
+import org.a2aproject.sdk.util.Utils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+
 import io.agentscope.core.a2a.server.constants.A2aServerConstants;
 import io.agentscope.core.a2a.server.transport.TransportWrapper;
 import java.time.Duration;
@@ -124,7 +100,7 @@ public class JsonRpcTransportWrapper implements TransportWrapper<String, Object>
                 result = handleNonStreamRequest(body, context);
                 log.info("Handling non-streaming request, returning JSON response");
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("JSON parsing error: ", e);
             result = handleError(e);
         } catch (Throwable t) {
@@ -159,7 +135,7 @@ public class JsonRpcTransportWrapper implements TransportWrapper<String, Object>
     }
 
     private Flux<? extends JSONRPCResponse<?>> handleStreamRequest(
-            String body, ServerCallContext context) throws JsonProcessingException {
+            String body, ServerCallContext context) throws JacksonException {
         StreamingJSONRPCRequest<?> request =
                 Utils.OBJECT_MAPPER.readValue(body, StreamingJSONRPCRequest.class);
         Flow.Publisher<? extends JSONRPCResponse<?>> publisher;
@@ -204,7 +180,7 @@ public class JsonRpcTransportWrapper implements TransportWrapper<String, Object>
     }
 
     private JSONRPCResponse<?> handleNonStreamRequest(String body, ServerCallContext context)
-            throws JsonProcessingException {
+            throws JacksonException {
         NonStreamingJSONRPCRequest<?> request =
                 Utils.OBJECT_MAPPER.readValue(body, NonStreamingJSONRPCRequest.class);
         if (request instanceof GetTaskRequest req) {
@@ -226,7 +202,7 @@ public class JsonRpcTransportWrapper implements TransportWrapper<String, Object>
         }
     }
 
-    private JSONRPCErrorResponse handleError(JsonProcessingException exception) {
+    private JSONRPCErrorResponse handleError(JacksonException exception) {
         Object id = null;
         JSONRPCError jsonRpcError = null;
         if (exception instanceof JsonParseException) {

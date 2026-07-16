@@ -16,7 +16,7 @@
 package io.agentscope.builder.web.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.builder.runtime.marketplace.BuilderMarketplace;
 import io.agentscope.builder.runtime.marketplace.MarketSkillContent;
 import io.agentscope.builder.runtime.marketplace.UserMarketplaceRegistry;

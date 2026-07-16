@@ -16,9 +16,11 @@
 package io.agentscope.dataagent.web.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.datatype.jsr310.JavaTimeModule;
 import io.agentscope.core.agent.RuntimeContext;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.model.ChatResponse;
@@ -135,10 +137,9 @@ public class AgentToolsController {
     }
 
     private static final ObjectMapper MAPPER =
-            new ObjectMapper()
-                    .registerModule(new JavaTimeModule())
-                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                    .enable(SerializationFeature.INDENT_OUTPUT);
+            JsonMapper.builder()
+                    .addModule(new JavaTimeModule())
+                    .enable(SerializationFeature.INDENT_OUTPUT).build();
 
     private final AgentAccessGuard guard;
     private final AgentActivityStore activity;
@@ -258,7 +259,7 @@ public class AgentToolsController {
                     String json;
                     try {
                         json = MAPPER.writeValueAsString(body);
-                    } catch (IOException e) {
+                    } catch (JacksonException e) {
                         throw new ResponseStatusException(
                                 HttpStatus.INTERNAL_SERVER_ERROR,
                                 "Failed to serialize tools.json: " + e.getMessage());

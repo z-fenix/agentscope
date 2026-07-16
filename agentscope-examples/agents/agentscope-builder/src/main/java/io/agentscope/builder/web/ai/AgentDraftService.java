@@ -15,7 +15,7 @@
  */
 package io.agentscope.builder.web.ai;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.builder.web.catalog.AgentCatalogService.AgentDraft;
 import io.agentscope.core.message.ContentBlock;
 import io.agentscope.core.message.Msg;

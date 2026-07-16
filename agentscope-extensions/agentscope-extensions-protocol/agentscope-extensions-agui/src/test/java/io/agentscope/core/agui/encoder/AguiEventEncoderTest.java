@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.agentscope.core.agui.event.AguiEvent;
 import io.agentscope.core.agui.event.AguiEventType;
 import io.agentscope.core.util.JsonUtils;
@@ -27,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
 
 /**
  * Unit tests for AguiEventEncoder.
@@ -218,7 +218,7 @@ class AguiEventEncoderTest {
     }
 
     @Test
-    void testEncodeToJsonWithComplexEvent() throws JsonProcessingException {
+    void testEncodeToJsonWithComplexEvent() throws JacksonException {
         AguiEvent.StateSnapshot event =
                 new AguiEvent.StateSnapshot(
                         "thread-1",

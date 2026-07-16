@@ -40,68 +40,68 @@ import reactor.core.publisher.Mono;
  *
  * <p>When {@code agentId} is set on the payload, the caller must hold at least {@link Tier#RUN}
  * on that agent — otherwise the request is rejected with 403 before reaching the channel.
- * {@link OutboundService} performs a second, channel-routing-based check that prevents one
- * agent from posting through a binding owned by a different agent.
+ * {@link OutboundService} performs a second, channel-routing-based check that prevents one agent
+ * from posting through a binding owned by a different agent.
  */
 @RestController
 @RequestMapping("/api/outbound")
 public class OutboundController {
 
-    private final OutboundService outboundService;
-    private final AgentAccessGuard guard;
+  private final OutboundService outboundService;
+  private final AgentAccessGuard guard;
 
-    public OutboundController(BuilderBootstrap bootstrap, AgentAccessGuard guard) {
-        this.outboundService = new OutboundService(bootstrap.channelManager());
-        this.guard = guard;
-    }
+  public OutboundController(BuilderBootstrap bootstrap, AgentAccessGuard guard) {
+    this.outboundService = new OutboundService(bootstrap.channelManager());
+    this.guard = guard;
+  }
 
-    @PostMapping("/send")
-    public Mono<ResponseEntity<Map<String, Object>>> send(
-            @RequestBody OutboundRequest req, Authentication auth) {
-        return Mono.fromRunnable(
-                        () -> {
-                            String agentId = req != null ? req.agentId() : null;
-                            if (agentId != null && !agentId.isBlank()) {
-                                String userId = (String) auth.getPrincipal();
-                                guard.require(userId, agentId, Tier.RUN);
-                            }
-                            outboundService.send(req);
-                        })
-                .thenReturn(ResponseEntity.ok(Map.<String, Object>of("status", "ok")))
-                .onErrorResume(
-                        ResponseStatusException.class,
-                        e ->
-                                Mono.just(
-                                        ResponseEntity.status(e.getStatusCode())
-                                                .body(
-                                                        Map.of(
-                                                                "status",
-                                                                "error",
-                                                                "error",
-                                                                e.getReason() == null
-                                                                        ? e.getMessage()
-                                                                        : e.getReason()))))
-                .onErrorResume(
-                        IllegalArgumentException.class,
-                        e ->
-                                Mono.just(
-                                        ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                                .body(
-                                                        Map.of(
-                                                                "status",
-                                                                "error",
-                                                                "error",
-                                                                e.getMessage()))))
-                .onErrorResume(
-                        IllegalStateException.class,
-                        e ->
-                                Mono.just(
-                                        ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                                .body(
-                                                        Map.of(
-                                                                "status",
-                                                                "error",
-                                                                "error",
-                                                                e.getMessage()))));
-    }
+  @PostMapping("/send")
+  public Mono<ResponseEntity<Map<String, Object>>> send(
+      @RequestBody OutboundRequest req, Authentication auth) {
+    return Mono.fromRunnable(
+            () -> {
+              String agentId = req != null ? req.agentId() : null;
+              if (agentId != null && !agentId.isBlank()) {
+                String userId = (String) auth.getPrincipal();
+                guard.require(userId, agentId, Tier.RUN);
+              }
+              outboundService.send(req);
+            })
+        .thenReturn(ResponseEntity.ok(Map.<String, Object>of("status", "ok")))
+        .onErrorResume(
+            ResponseStatusException.class,
+            e ->
+                Mono.just(
+                    ResponseEntity.status(e.getStatusCode())
+                        .body(
+                            Map.of(
+                                "status",
+                                "error",
+                                "error",
+                                e.getReason() == null
+                                    ? e.getMessage()
+                                    : e.getReason()))))
+        .onErrorResume(
+            IllegalArgumentException.class,
+            e ->
+                Mono.just(
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(
+                            Map.of(
+                                "status",
+                                "error",
+                                "error",
+                                e.getMessage()))))
+        .onErrorResume(
+            IllegalStateException.class,
+            e ->
+                Mono.just(
+                    ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(
+                            Map.of(
+                                "status",
+                                "error",
+                                "error",
+                                e.getMessage()))));
+  }
 }

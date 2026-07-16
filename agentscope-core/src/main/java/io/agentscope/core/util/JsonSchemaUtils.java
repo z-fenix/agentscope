@@ -16,19 +16,19 @@
 
 package io.agentscope.core.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import io.agentscope.core.tool.ToolSchemaModule;
 import java.lang.reflect.Type;
 import java.util.Map;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Utility class for JSON Schema operations.
@@ -57,109 +57,110 @@ import java.util.Map;
  */
 public class JsonSchemaUtils {
 
-    private static final boolean PROPERTY_REQUIRED_BY_DEFAULT = false;
+  private static final boolean PROPERTY_REQUIRED_BY_DEFAULT = false;
 
-    private static final SchemaGenerator schemaGenerator;
+  private static final SchemaGenerator schemaGenerator;
 
-    static {
-        // JacksonModule to support @JsonProperty, @JsonPropertyDescription annotations
-        JacksonModule jacksonModule =
-                new JacksonModule(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED);
+  static {
+    // JacksonModule to support @JsonProperty, @JsonPropertyDescription annotations
+    JacksonSchemaModule jacksonModule =
+        new JacksonSchemaModule(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED);
 
-        ToolSchemaModule toolSchemaModule =
-                PROPERTY_REQUIRED_BY_DEFAULT
-                        ? new ToolSchemaModule()
-                        : new ToolSchemaModule(
-                                ToolSchemaModule.Option.PROPERTY_REQUIRED_FALSE_BY_DEFAULT);
+    ToolSchemaModule toolSchemaModule =
+        PROPERTY_REQUIRED_BY_DEFAULT
+            ? new ToolSchemaModule()
+            : new ToolSchemaModule(
+                ToolSchemaModule.Option.PROPERTY_REQUIRED_FALSE_BY_DEFAULT);
 
-        SchemaGeneratorConfigBuilder configBuilder =
-                new SchemaGeneratorConfigBuilder(
-                                SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
-                        .with(jacksonModule)
-                        .with(toolSchemaModule)
-                        .with(Option.PLAIN_DEFINITION_KEYS)
-                        .without(Option.SCHEMA_VERSION_INDICATOR);
-        SchemaGeneratorConfig config = configBuilder.build();
-        schemaGenerator = new SchemaGenerator(config);
+    SchemaGeneratorConfigBuilder configBuilder =
+        new SchemaGeneratorConfigBuilder(
+            SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
+            .with(jacksonModule)
+            .with(toolSchemaModule)
+            .with(Option.PLAIN_DEFINITION_KEYS)
+            .without(Option.SCHEMA_VERSION_INDICATOR);
+    SchemaGeneratorConfig config = configBuilder.build();
+    schemaGenerator = new SchemaGenerator(config);
+  }
+
+  /**
+   * Generate JSON Schema from a Java class. This method is suitable for structured output scenarios
+   * where complex nested objects need to be converted to JSON Schema format.
+   *
+   * @param clazz The class to generate schema for
+   * @return JSON Schema as a Map
+   * @throws RuntimeException if schema generation fails due to reflection errors, configuration
+   *                          issues, or other processing errors
+   */
+  public static Map<String, Object> generateSchemaFromClass(Class<?> clazz) {
+    try {
+      JsonNode schemaNode = schemaGenerator.generateSchema(clazz);
+      return JsonUtils.getJsonCodec()
+          .convertValue(schemaNode, new TypeReference<Map<String, Object>>() {
+          });
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to generate JSON schema for " + clazz.getName(), e);
+    }
+  }
+
+  /**
+   * Generate JSON Schema from a tools.jackson.databind.JsonNode instance. This method is suitable
+   * for structured output scenarios where complex nested objects need to be converted to JSON
+   * Schema format.
+   *
+   * @param schema The tools.jackson.databind.JsonNode instance to generate schema for
+   * @return JSON Schema as a Map
+   * @throws RuntimeException if schema generation fails due to reflection errors, configuration
+   *                          issues, or other processing errors
+   */
+  public static Map<String, Object> generateSchemaFromJsonNode(JsonNode schema) {
+    try {
+      return JsonUtils.getJsonCodec()
+          .convertValue(schema, new TypeReference<Map<String, Object>>() {
+          });
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to generate JSON schema for schema", e);
+    }
+  }
+
+  /**
+   * Generate JSON Schema from a Java Type (supports Generics).
+   *
+   * @param type The type to generate schema for
+   * @return JSON Schema as a Map
+   */
+  public static Map<String, Object> generateSchemaFromType(Type type) {
+    try {
+      JsonNode schemaNode = schemaGenerator.generateSchema(type);
+      return JsonUtils.getJsonCodec()
+          .convertValue(schemaNode, new TypeReference<Map<String, Object>>() {
+          });
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Failed to generate JSON schema for " + type.getTypeName(), e);
+    }
+  }
+
+  /**
+   * Convert Map to typed object.
+   *
+   * @param data        The data map
+   * @param targetClass The target class
+   * @param <T>         The type
+   * @return Converted object
+   * @throws IllegalStateException if the input data is null
+   * @throws RuntimeException      if the conversion fails due to type mismatch, JSON parsing
+   *                               errors, or incompatible data structure
+   */
+  public static <T> T convertToObject(Object data, Class<T> targetClass) {
+    if (data == null) {
+      throw new IllegalStateException("No structured data available in response");
     }
 
-    /**
-     * Generate JSON Schema from a Java class.
-     * This method is suitable for structured output scenarios where complex nested
-     * objects need to be converted to JSON Schema format.
-     *
-     * @param clazz The class to generate schema for
-     * @return JSON Schema as a Map
-     * @throws RuntimeException if schema generation fails due to reflection errors,
-     *                          configuration issues, or other processing errors
-     */
-    public static Map<String, Object> generateSchemaFromClass(Class<?> clazz) {
-        try {
-            JsonNode schemaNode = schemaGenerator.generateSchema(clazz);
-            return JsonUtils.getJsonCodec()
-                    .convertValue(schemaNode, new TypeReference<Map<String, Object>>() {});
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate JSON schema for " + clazz.getName(), e);
-        }
+    try {
+      return JsonUtils.getJsonCodec().convertValue(data, targetClass);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to convert metadata to " + targetClass.getName(), e);
     }
-
-    /**
-     * Generate JSON Schema from a com.fasterxml.jackson.databind.JsonNode instance.
-     * This method is suitable for structured output scenarios where complex nested
-     * objects need to be converted to JSON Schema format.
-     *
-     * @param schema The com.fasterxml.jackson.databind.JsonNode instance to generate schema for
-     * @return JSON Schema as a Map
-     * @throws RuntimeException if schema generation fails due to reflection errors,
-     *                          configuration issues, or other processing errors
-     */
-    public static Map<String, Object> generateSchemaFromJsonNode(JsonNode schema) {
-        try {
-            return JsonUtils.getJsonCodec()
-                    .convertValue(schema, new TypeReference<Map<String, Object>>() {});
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate JSON schema for schema", e);
-        }
-    }
-
-    /**
-     * Generate JSON Schema from a Java Type (supports Generics).
-     *
-     * @param type The type to generate schema for
-     * @return JSON Schema as a Map
-     */
-    public static Map<String, Object> generateSchemaFromType(Type type) {
-        try {
-            JsonNode schemaNode = schemaGenerator.generateSchema(type);
-            return JsonUtils.getJsonCodec()
-                    .convertValue(schemaNode, new TypeReference<Map<String, Object>>() {});
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    "Failed to generate JSON schema for " + type.getTypeName(), e);
-        }
-    }
-
-    /**
-     * Convert Map to typed object.
-     *
-     * @param data        The data map
-     * @param targetClass The target class
-     * @param <T>         The type
-     * @return Converted object
-     * @throws IllegalStateException if the input data is null
-     * @throws RuntimeException      if the conversion fails due to type mismatch,
-     *                               JSON parsing errors, or incompatible data
-     *                               structure
-     */
-    public static <T> T convertToObject(Object data, Class<T> targetClass) {
-        if (data == null) {
-            throw new IllegalStateException("No structured data available in response");
-        }
-
-        try {
-            return JsonUtils.getJsonCodec().convertValue(data, targetClass);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to convert metadata to " + targetClass.getName(), e);
-        }
-    }
+  }
 }

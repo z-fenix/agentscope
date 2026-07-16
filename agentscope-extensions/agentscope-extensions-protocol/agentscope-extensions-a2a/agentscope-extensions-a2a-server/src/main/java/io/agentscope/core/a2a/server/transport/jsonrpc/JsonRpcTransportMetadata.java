@@ -16,8 +16,10 @@
 
 package io.agentscope.core.a2a.server.transport.jsonrpc;
 
-import io.a2a.server.TransportMetadata;
-import io.a2a.spec.TransportProtocol;
+
+import org.a2aproject.sdk.server.TransportMetadata;
+import org.a2aproject.sdk.spec.TransportProtocol;
+import org.jspecify.annotations.NonNull;
 
 /**
  * SPI for JSON-RPC transport metadata.
@@ -27,7 +29,7 @@ import io.a2a.spec.TransportProtocol;
 public class JsonRpcTransportMetadata implements TransportMetadata {
 
     @Override
-    public String getTransportProtocol() {
+    public @NonNull String getTransportProtocol() {
         return TransportProtocol.JSONRPC.asString();
     }
 }

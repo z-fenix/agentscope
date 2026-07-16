@@ -15,7 +15,7 @@
  */
 package io.agentscope.extensions.channel.gitlab;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.message.MsgRole;
 import io.agentscope.harness.agent.gateway.channel.InboundMessage;

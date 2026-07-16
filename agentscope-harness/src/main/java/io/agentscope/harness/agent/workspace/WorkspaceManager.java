@@ -26,11 +26,11 @@ import static io.agentscope.harness.agent.workspace.WorkspaceConstants.SESSIONS_
 import static io.agentscope.harness.agent.workspace.WorkspaceConstants.SKILLS_DIR;
 import static io.agentscope.harness.agent.workspace.WorkspaceConstants.TASKS_DIR;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.datatype.jsr310.JavaTimeModule;
 import io.agentscope.core.agent.RuntimeContext;
 import io.agentscope.harness.agent.filesystem.AbstractFilesystem;
 import io.agentscope.harness.agent.filesystem.OverlayFilesystem;

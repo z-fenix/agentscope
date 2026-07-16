@@ -15,7 +15,7 @@
  */
 package io.agentscope.core.agent;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.message.UserMessage;
 import java.util.List;

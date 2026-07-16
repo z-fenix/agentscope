@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -77,14 +77,14 @@ class JacksonJsonCodecTest {
     @Test
     void testDefaultConstructor() {
         JacksonJsonCodec defaultCodec = new JacksonJsonCodec();
-        assertNotNull(defaultCodec.getObjectMapper());
+        assertNotNull(defaultCodec.objectMapper());
     }
 
     @Test
     void testCustomObjectMapperConstructor() {
         ObjectMapper customMapper = new ObjectMapper();
         JacksonJsonCodec customCodec = new JacksonJsonCodec(customMapper);
-        assertEquals(customMapper, customCodec.getObjectMapper());
+        assertEquals(customMapper, customCodec.objectMapper());
     }
 
     @Test

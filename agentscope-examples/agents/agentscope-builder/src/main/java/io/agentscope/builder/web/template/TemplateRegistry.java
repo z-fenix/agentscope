@@ -16,7 +16,7 @@
 package io.agentscope.builder.web.template;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.builder.runtime.BuilderBootstrap;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;

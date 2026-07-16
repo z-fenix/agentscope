@@ -15,22 +15,21 @@
  */
 package io.agentscope.extensions.sandbox.kubernetes;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.harness.agent.sandbox.SandboxState;
 import io.agentscope.harness.agent.sandbox.WorkspaceSpec;
 import io.agentscope.harness.agent.sandbox.json.HarnessSandboxJacksonModule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 class KubernetesSandboxStateSerdeTest {
 
     @Test
     void roundTripKubernetesState() throws Exception {
-        ObjectMapper mapper =
-                new ObjectMapper()
-                        .findAndRegisterModules()
-                        .registerModule(new HarnessSandboxJacksonModule())
-                        .registerModule(new KubernetesHarnessSandboxJacksonModule());
+        ObjectMapper mapper = JsonMapper.builder()
+                        .addModule(new HarnessSandboxJacksonModule())
+                        .addModule(new KubernetesHarnessSandboxJacksonModule()).build();
 
         KubernetesSandboxState state = new KubernetesSandboxState();
         state.setSessionId("s1");

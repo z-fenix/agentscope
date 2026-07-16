@@ -15,7 +15,7 @@
  */
 package io.agentscope.builder.web.audit;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.builder.web.auth.UserStore;
 import io.agentscope.builder.web.catalog.AgentCatalogService;
 import io.agentscope.harness.agent.HarnessAgent;

@@ -21,7 +21,7 @@ import com.aliyun.oss.model.ListObjectsV2Request;
 import com.aliyun.oss.model.ListObjectsV2Result;
 import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.OSSObjectSummary;
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 import io.agentscope.core.state.AgentStateStore;
 import io.agentscope.core.state.ListHashUtil;
 import io.agentscope.core.state.State;

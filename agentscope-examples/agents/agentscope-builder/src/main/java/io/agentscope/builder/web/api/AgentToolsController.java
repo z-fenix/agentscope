@@ -16,9 +16,9 @@
 package io.agentscope.builder.web.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.datatype.jsr310.JavaTimeModule;
 import io.agentscope.builder.web.audit.ActivityEvent;
 import io.agentscope.builder.web.audit.AgentActivityStore;
 import io.agentscope.builder.web.catalog.AgentCatalogService;

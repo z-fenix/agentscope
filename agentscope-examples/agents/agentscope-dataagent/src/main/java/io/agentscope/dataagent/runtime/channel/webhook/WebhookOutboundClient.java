@@ -15,7 +15,7 @@
  */
 package io.agentscope.dataagent.runtime.channel.webhook;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.core.message.Msg;
 import java.net.URI;
 import java.net.http.HttpClient;

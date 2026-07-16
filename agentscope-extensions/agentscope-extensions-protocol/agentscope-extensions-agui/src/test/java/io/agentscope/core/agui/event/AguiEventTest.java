@@ -21,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JacksonException;
 import io.agentscope.core.agui.model.AguiMessage;
 import io.agentscope.core.util.JsonUtils;
 import java.util.List;
@@ -67,7 +68,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.RunStarted event = new AguiEvent.RunStarted("thread-1", "run-1");
 
             String json = JsonUtils.getJsonCodec().toJson(event);
@@ -113,7 +114,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.RunFinished event = new AguiEvent.RunFinished("thread-2", "run-2");
 
             String json = JsonUtils.getJsonCodec().toJson(event);
@@ -164,7 +165,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.TextMessageStart event =
                     new AguiEvent.TextMessageStart("thread-1", "run-1", "msg-1", "assistant");
 
@@ -212,7 +213,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.TextMessageContent event =
                     new AguiEvent.TextMessageContent("thread-1", "run-1", "msg-1", "Hello World");
 
@@ -255,7 +256,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.TextMessageEnd event =
                     new AguiEvent.TextMessageEnd("thread-1", "run-1", "msg-1");
 
@@ -305,7 +306,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.ToolCallStart event =
                     new AguiEvent.ToolCallStart("thread-1", "run-1", "tc-1", "get_weather");
 
@@ -358,7 +359,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.ToolCallArgs event =
                     new AguiEvent.ToolCallArgs("thread-1", "run-1", "tc-1", "{\"key\":\"value\"}");
 
@@ -397,7 +398,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.ToolCallEnd event = new AguiEvent.ToolCallEnd("thread-1", "run-1", "tc-1");
 
             String json = JsonUtils.getJsonCodec().toJson(event);
@@ -452,7 +453,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.ToolCallResult event =
                     new AguiEvent.ToolCallResult(
                             "thread-1", "run-1", "tc-1", "Operation completed", "tool", "msg-1");
@@ -508,7 +509,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.StateSnapshot event =
                     new AguiEvent.StateSnapshot(
                             "thread-1", "run-1", Map.of("count", 10, "name", "test"));
@@ -569,7 +570,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.StateDelta event =
                     new AguiEvent.StateDelta(
                             "thread-1",
@@ -656,7 +657,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.JsonPatchOperation op = AguiEvent.JsonPatchOperation.add("/path", "value");
 
             String json = JsonUtils.getJsonCodec().toJson(op);
@@ -724,7 +725,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.Raw event =
                     new AguiEvent.Raw("thread-1", "run-1", Map.of("key", "value", "number", 42));
 
@@ -809,7 +810,7 @@ class AguiEventTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiEvent.Custom event =
                     new AguiEvent.Custom(
                             "thread-1",

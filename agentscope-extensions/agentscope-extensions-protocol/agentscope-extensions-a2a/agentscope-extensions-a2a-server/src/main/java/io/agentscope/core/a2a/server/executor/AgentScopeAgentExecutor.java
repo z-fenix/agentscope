@@ -16,20 +16,6 @@
 
 package io.agentscope.core.a2a.server.executor;
 
-import io.a2a.A2A;
-import io.a2a.server.ServerCallContext;
-import io.a2a.server.agentexecution.AgentExecutor;
-import io.a2a.server.agentexecution.RequestContext;
-import io.a2a.server.events.EventQueue;
-import io.a2a.server.tasks.TaskUpdater;
-import io.a2a.spec.JSONRPCError;
-import io.a2a.spec.Message;
-import io.a2a.spec.Part;
-import io.a2a.spec.Task;
-import io.a2a.spec.TaskState;
-import io.a2a.spec.TaskStatus;
-import io.a2a.spec.TextPart;
-import io.agentscope.core.a2a.agent.utils.LoggerUtil;
 import io.agentscope.core.a2a.server.constants.A2aServerConstants;
 import io.agentscope.core.a2a.server.executor.runner.AgentRequestOptions;
 import io.agentscope.core.a2a.server.executor.runner.AgentRunner;
@@ -46,6 +32,16 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import org.a2aproject.sdk.grpc.A2A;
+import org.a2aproject.sdk.grpc.TaskState;
+import org.a2aproject.sdk.server.agentexecution.AgentExecutor;
+import org.a2aproject.sdk.server.agentexecution.RequestContext;
+import org.a2aproject.sdk.server.events.EventQueue;
+import org.a2aproject.sdk.server.tasks.AgentEmitter;
+import org.a2aproject.sdk.spec.A2AError;
+import org.a2aproject.sdk.spec.Message;
+import org.a2aproject.sdk.spec.Task;
+import org.jspecify.annotations.NonNull;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +71,7 @@ public class AgentScopeAgentExecutor implements AgentExecutor {
     }
 
     @Override
-    public void cancel(RequestContext context, EventQueue eventQueue) throws JSONRPCError {
+    public void cancel(@NonNull RequestContext context, @NonNull AgentEmitter emitter) throws A2AError {
         try {
             log.info("[{}] Start to Cancel Task", context.getTaskId());
             TaskUpdater taskUpdater = new TaskUpdater(context, eventQueue);
@@ -93,7 +89,7 @@ public class AgentScopeAgentExecutor implements AgentExecutor {
     }
 
     @Override
-    public void execute(RequestContext context, EventQueue eventQueue) throws JSONRPCError {
+    public void execute(@NonNull RequestContext context, @NonNull AgentEmitter emitter) throws A2AError {
         try {
             List<Msg> inputMessages =
                     MessageConvertUtil.convertFromMessageToMsgs(context.getMessage());
@@ -103,9 +99,9 @@ public class AgentScopeAgentExecutor implements AgentExecutor {
             Task task = context.getTask();
             if (task == null) {
                 task = newTask(context.getMessage());
-                log.info("[{}] Created new task.", task.getId());
+                log.info("[{}] Created new task.", task.id());
             } else {
-                log.info("[{}] Using existing task.", task.getId());
+                log.info("[{}] Using existing task.", task.id());
             }
             if (isBlockRequest(context)) {
                 processTaskBlocking(context, eventQueue, task, resultFlux);
@@ -133,26 +129,26 @@ public class AgentScopeAgentExecutor implements AgentExecutor {
     }
 
     private String getUserId(Message message) {
-        if (message.getMetadata() != null && message.getMetadata().containsKey("userId")) {
-            return String.valueOf(message.getMetadata().get("userId"));
+        if (message.metadata() != null && message.metadata().containsKey("userId")) {
+            return String.valueOf(message.metadata().get("userId"));
         }
         return "";
     }
 
     private String getSessionId(Message message) {
-        if (message.getMetadata() != null && message.getMetadata().containsKey("sessionId")) {
-            return String.valueOf(message.getMetadata().get("sessionId"));
+        if (message.metadata() != null && message.metadata().containsKey("sessionId")) {
+            return String.valueOf(message.metadata().get("sessionId"));
         }
         return "";
     }
 
     private Task newTask(Message request) {
-        String contextId = request.getContextId();
-        String taskId = request.getTaskId();
+        String contextId = request.contextId();
+        String taskId = request.taskId();
         return new Task(
                 taskId,
                 contextId,
-                new TaskStatus(TaskState.SUBMITTED),
+                new TaskStatus(TaskState.TASK_STATE_SUBMITTED),
                 null,
                 List.of(request),
                 null);
@@ -241,7 +237,7 @@ public class AgentScopeAgentExecutor implements AgentExecutor {
         subscriptions.remove(taskId);
     }
 
-    private abstract static class BaseFluxEventHandler {
+  private abstract static class BaseFluxEventHandler {
 
         protected final RequestContext context;
 

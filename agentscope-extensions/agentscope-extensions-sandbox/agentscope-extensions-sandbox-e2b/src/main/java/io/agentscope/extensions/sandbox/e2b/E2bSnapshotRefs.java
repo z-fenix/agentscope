@@ -15,7 +15,7 @@
  */
 package io.agentscope.extensions.sandbox.e2b;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 

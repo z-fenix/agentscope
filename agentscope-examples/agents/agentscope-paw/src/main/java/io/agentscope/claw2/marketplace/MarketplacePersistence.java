@@ -15,9 +15,9 @@
  */
 package io.agentscope.claw2.marketplace;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import io.agentscope.claw2.runtime.ClawBootstrap;
 import io.agentscope.claw2.runtime.config.AgentscopeConfig;
 import io.agentscope.claw2.runtime.config.MarketplaceConfigEntry;
@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Helper that loads, mutates, and atomically rewrites the {@code marketplaces} section of
@@ -58,9 +59,9 @@ public class MarketplacePersistence {
         this.bootstrap = bootstrap;
         this.registry = registry;
         this.mapper =
-                new ObjectMapper()
+                JsonMapper.builder()
                         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                        .enable(SerializationFeature.INDENT_OUTPUT);
+                        .enable(SerializationFeature.INDENT_OUTPUT).build();
     }
 
     /**

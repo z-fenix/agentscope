@@ -15,7 +15,7 @@
  */
 package io.agentscope.extensions.channel.dingtalk;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.core.message.Msg;
 import io.agentscope.harness.agent.gateway.channel.OutboundAddress;
 import io.agentscope.harness.agent.gateway.channel.PeerKind;

@@ -15,8 +15,8 @@
  */
 package io.agentscope.extensions.channel.wecom;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.web.reactive.function.client.WebClient;

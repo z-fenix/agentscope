@@ -15,8 +15,8 @@
  */
 package io.agentscope.claw2.runtime;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.claw2.runtime.config.AgentConfigEntry;
 import io.agentscope.claw2.runtime.config.AgentscopeConfig;
 import io.agentscope.claw2.runtime.config.ChannelConfigEntry;
@@ -57,6 +57,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Single API class for assembling, configuring, and running the agentscope harness.
@@ -135,8 +136,8 @@ public final class ClawBootstrap {
             return new AgentscopeConfig();
         }
         ObjectMapper mapper =
-                new ObjectMapper()
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                JsonMapper.builder()
+                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).build();
         return mapper.readValue(configPath.toFile(), AgentscopeConfig.class);
     }
 

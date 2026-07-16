@@ -15,10 +15,9 @@
  */
 package io.agentscope.harness.agent.skill.curator;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import io.agentscope.core.agent.RuntimeContext;
 import io.agentscope.harness.agent.filesystem.AbstractFilesystem;
 import io.agentscope.harness.agent.skill.WorkspaceSkillRepository;
@@ -32,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * Background skill maintenance orchestrator. Mirrors hermes-agent's {@code agent/curator.py}
@@ -63,11 +64,10 @@ public class SkillCurator {
     public static final String REPORTS_DIR = "skills/.curator_reports";
 
     private static final ObjectMapper JSON =
-            new ObjectMapper()
-                    .registerModule(new JavaTimeModule())
-                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            JsonMapper.builder()
+                    .addModule(new JavaTimeModule())
                     .enable(SerializationFeature.INDENT_OUTPUT)
-                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
     private final AbstractFilesystem filesystem;
     private final SkillUsageStore usageStore;

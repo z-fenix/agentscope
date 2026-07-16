@@ -15,8 +15,8 @@
  */
 package io.agentscope.extensions.sandbox.agentrun;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.core.tool.mcp.McpClientBuilder;
 import io.agentscope.core.tool.mcp.McpClientWrapper;
 import io.agentscope.harness.agent.sandbox.SandboxErrorCode;

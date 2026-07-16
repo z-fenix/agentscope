@@ -219,7 +219,7 @@ class InboxMiddlewareTest {
 
             @Override
             public reactor.core.publisher.Mono<Msg> call(
-                    List<Msg> msgs, com.fasterxml.jackson.databind.JsonNode schema) {
+                    List<Msg> msgs, tools.jackson.databind.JsonNode schema) {
                 return reactor.core.publisher.Mono.empty();
             }
 
@@ -239,7 +239,7 @@ class InboxMiddlewareTest {
             public Flux<io.agentscope.core.agent.Event> stream(
                     List<Msg> msgs,
                     io.agentscope.core.agent.StreamOptions options,
-                    com.fasterxml.jackson.databind.JsonNode schema) {
+                    tools.jackson.databind.JsonNode schema) {
                 return Flux.empty();
             }
 

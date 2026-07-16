@@ -33,7 +33,7 @@ import java.util.Map;
 public class DockerSandboxClientOptions extends SandboxClientOptions {
 
     /** Docker image to run. Defaults to {@code ubuntu:22.04}. */
-    private String image = "ubuntu:22.04";
+    private String image = "ubuntu:26.04";
 
     /** Workspace root path inside the container. Defaults to {@code /workspace}. */
     private String workspaceRoot = "/workspace";

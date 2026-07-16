@@ -15,9 +15,7 @@
  */
 package io.agentscope.dataagent.web.marketplace;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.agentscope.dataagent.runtime.DataAgentBootstrap;
 import io.agentscope.dataagent.web.persistence.jpa.ContributionEntity;
 import io.agentscope.dataagent.web.persistence.jpa.ContributionRepository;
@@ -34,6 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Application service backing the user-contribution + admin-approval flow.
@@ -322,7 +323,7 @@ public class MarketContributionService {
     private String serializePayload(List<FileEntry> payload) {
         try {
             return objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("failed to serialize payload: " + e.getMessage(), e);
         }
     }
@@ -333,7 +334,7 @@ public class MarketContributionService {
         }
         try {
             return objectMapper.readValue(json, FILE_ENTRY_LIST_TYPE);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(
                     "failed to deserialize payload (corrupt row?): " + e.getMessage(), e);
         }

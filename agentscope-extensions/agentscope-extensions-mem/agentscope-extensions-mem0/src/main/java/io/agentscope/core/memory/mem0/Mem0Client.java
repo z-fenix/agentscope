@@ -15,7 +15,7 @@
  */
 package io.agentscope.core.memory.mem0;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 import io.agentscope.core.util.JsonCodec;
 import io.agentscope.core.util.JsonUtils;
 import java.io.IOException;

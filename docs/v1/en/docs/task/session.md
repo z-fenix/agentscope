@@ -327,7 +327,7 @@ rm -rf ~/.agentscope/sessions/*.json
 If you need to preserve historical conversation data, write a migration script:
 
 ```java
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.session.JsonSession;

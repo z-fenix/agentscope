@@ -15,9 +15,9 @@
  */
 package io.agentscope.dataagent.web.persistence.jpa;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.dataagent.runtime.config.SkillRepositoryConfigEntry;
 import io.agentscope.dataagent.web.catalog.UserAgentDefinitionStore;
 import io.agentscope.dataagent.web.share.AgentShareGrant;
@@ -191,7 +191,7 @@ public class JpaUserAgentDefinitionStore implements UserAgentDefinitionStore {
         if (json == null || json.isBlank()) return null;
         try {
             return MAPPER.readValue(json, STRING_LIST);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             return null;
         }
     }
@@ -200,7 +200,7 @@ public class JpaUserAgentDefinitionStore implements UserAgentDefinitionStore {
         if (list == null) return null;
         try {
             return MAPPER.writeValueAsString(list);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             return null;
         }
     }
@@ -209,7 +209,7 @@ public class JpaUserAgentDefinitionStore implements UserAgentDefinitionStore {
         if (json == null || json.isBlank()) return null;
         try {
             return MAPPER.readValue(json, SKILL_REPO_LIST);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             return null;
         }
     }
@@ -218,7 +218,7 @@ public class JpaUserAgentDefinitionStore implements UserAgentDefinitionStore {
         if (list == null || list.isEmpty()) return null;
         try {
             return MAPPER.writeValueAsString(list);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             return null;
         }
     }

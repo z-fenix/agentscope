@@ -15,7 +15,7 @@
  */
 package io.agentscope.core.agui.converter;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 import io.agentscope.core.agui.model.AguiFunctionCall;
 import io.agentscope.core.agui.model.AguiMessage;
 import io.agentscope.core.agui.model.AguiToolCall;

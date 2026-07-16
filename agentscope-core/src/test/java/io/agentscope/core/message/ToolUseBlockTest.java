@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +34,7 @@ class ToolUseBlockTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    void testJsonSerializationWithAllFields() throws JsonProcessingException {
+    void testJsonSerializationWithAllFields() throws JacksonException {
         ToolUseBlock toolUseBlock =
                 ToolUseBlock.builder()
                         .id("tool-123")
@@ -52,7 +52,7 @@ class ToolUseBlockTest {
     }
 
     @Test
-    void testJsonDeserializationWithAllFields() throws JsonProcessingException {
+    void testJsonDeserializationWithAllFields() throws JacksonException {
         String json =
                 """
                 {
@@ -80,7 +80,7 @@ class ToolUseBlockTest {
     }
 
     @Test
-    void testJsonDeserializationWithoutContent() throws JsonProcessingException {
+    void testJsonDeserializationWithoutContent() throws JacksonException {
         String json =
                 """
                 {
@@ -104,7 +104,7 @@ class ToolUseBlockTest {
     }
 
     @Test
-    void testJsonDeserializationWithoutMetadata() throws JsonProcessingException {
+    void testJsonDeserializationWithoutMetadata() throws JacksonException {
         String json =
                 """
                 {
@@ -125,7 +125,7 @@ class ToolUseBlockTest {
     }
 
     @Test
-    void testJsonDeserializationWithEmptyInput() throws JsonProcessingException {
+    void testJsonDeserializationWithEmptyInput() throws JacksonException {
         String json =
                 """
                 {
@@ -144,7 +144,7 @@ class ToolUseBlockTest {
     }
 
     @Test
-    void testJsonDeserializationWithNullContent() throws JsonProcessingException {
+    void testJsonDeserializationWithNullContent() throws JacksonException {
         String json =
                 """
                 {
@@ -165,7 +165,7 @@ class ToolUseBlockTest {
     }
 
     @Test
-    void testRoundTripSerialization() throws JsonProcessingException {
+    void testRoundTripSerialization() throws JacksonException {
         ToolUseBlock original =
                 ToolUseBlock.builder()
                         .id("tool-222")

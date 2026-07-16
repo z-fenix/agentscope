@@ -15,8 +15,8 @@
  */
 package io.agentscope.spring.boot.chat.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.chat.completions.model.ChatCompletionsChunk;
 import io.agentscope.core.chat.completions.streaming.ChatCompletionsStreamingAdapter;
@@ -93,7 +93,7 @@ public class ChatCompletionsStreamingService {
         try {
             String json = OBJECT_MAPPER.writeValueAsString(chunk);
             return ServerSentEvent.<String>builder().data(json).build();
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return ServerSentEvent.<String>builder()
                     .data("{\"error\":\"Serialization error\"}")
                     .build();

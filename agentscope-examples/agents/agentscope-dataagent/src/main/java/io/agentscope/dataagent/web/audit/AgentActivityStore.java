@@ -15,7 +15,7 @@
  */
 package io.agentscope.dataagent.web.audit;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.dataagent.web.auth.UserStore;
 import io.agentscope.dataagent.web.catalog.UserAgentDefinitionStore;
 import io.agentscope.dataagent.web.workspace.WorkspaceManagerFactory;

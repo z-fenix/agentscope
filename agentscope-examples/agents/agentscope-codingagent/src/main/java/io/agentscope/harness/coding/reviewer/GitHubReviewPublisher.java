@@ -15,7 +15,7 @@
  */
 package io.agentscope.harness.coding.reviewer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.harness.coding.observability.CodingAgentMetrics;
 import java.io.IOException;
 import java.net.URI;

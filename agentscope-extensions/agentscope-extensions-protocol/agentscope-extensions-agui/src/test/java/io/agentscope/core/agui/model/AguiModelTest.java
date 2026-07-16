@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import io.agentscope.core.util.JsonUtils;
 import java.util.List;
 import java.util.Map;
@@ -158,7 +158,7 @@ class AguiModelTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiMessage msg = AguiMessage.assistantMessage("msg-1", "Hello");
 
             String json = JsonUtils.getJsonCodec().toJson(msg);
@@ -250,7 +250,7 @@ class AguiModelTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiFunctionCall function = new AguiFunctionCall("test", "{\"key\":\"value\"}");
             AguiToolCall toolCall = new AguiToolCall("tc-1", function);
 
@@ -314,7 +314,7 @@ class AguiModelTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiFunctionCall function = new AguiFunctionCall("process", "{\"input\":\"data\"}");
 
             String json = JsonUtils.getJsonCodec().toJson(function);
@@ -397,7 +397,7 @@ class AguiModelTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiTool tool = new AguiTool("search", "Search for data", Map.of("type", "object"));
 
             String json = JsonUtils.getJsonCodec().toJson(tool);
@@ -460,7 +460,7 @@ class AguiModelTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             AguiContext context = new AguiContext("Time zone", "UTC");
 
             String json = JsonUtils.getJsonCodec().toJson(context);
@@ -594,7 +594,7 @@ class AguiModelTest {
         }
 
         @Test
-        void testJsonSerialization() throws JsonProcessingException {
+        void testJsonSerialization() throws JacksonException {
             RunAgentInput input =
                     RunAgentInput.builder()
                             .threadId("t1")
@@ -614,7 +614,7 @@ class AguiModelTest {
         }
 
         @Test
-        void testJsonCreatorConstructor() throws JsonProcessingException {
+        void testJsonCreatorConstructor() throws JacksonException {
             String json =
                     "{\"threadId\":\"t1\",\"runId\":\"r1\","
                         + "\"messages\":[{\"id\":\"m1\",\"role\":\"user\",\"content\":\"Hello\"}],"

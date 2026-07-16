@@ -15,9 +15,9 @@
  */
 package io.agentscope.core.chat.completions.converter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.core.chat.completions.model.ChatMessage;
 import io.agentscope.core.chat.completions.model.ToolCall;
 import io.agentscope.core.message.ContentBlock;
@@ -177,7 +177,7 @@ public class ChatMessageConverter {
 
         try {
             return objectMapper.readValue(arguments, new TypeReference<Map<String, Object>>() {});
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to parse tool arguments: {}", e.getMessage());
             return Map.of();
         }

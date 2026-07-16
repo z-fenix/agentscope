@@ -18,9 +18,6 @@ package io.agentscope.core.a2a.server.utils;
 
 import static io.agentscope.core.a2a.agent.utils.MessageConvertUtil.convertFromMsg;
 
-import io.a2a.spec.Artifact;
-import io.a2a.spec.Message;
-import io.a2a.spec.Part;
 import io.agentscope.core.a2a.agent.message.ContentBlockParserRouter;
 import io.agentscope.core.a2a.agent.message.MessageConstants;
 import io.agentscope.core.a2a.agent.message.PartParserRouter;
@@ -37,6 +34,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import org.a2aproject.sdk.spec.Artifact;
+import org.a2aproject.sdk.spec.Message;
 
 /**
  * Message Converter between Agentscope {@link Msg} and A2A {@link Message} or {@link Artifact}.

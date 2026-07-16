@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.core.training.util.TrainingTestConstants;
 import java.util.Arrays;
 import java.util.List;
@@ -59,7 +59,7 @@ class FeedbackRequestTest {
 
     @Test
     @DisplayName("Should serialize to JSON with snake_case field names")
-    void shouldSerializeToJsonWithSnakeCaseFieldNames() throws JsonProcessingException {
+    void shouldSerializeToJsonWithSnakeCaseFieldNames() throws JacksonException {
         // Arrange
         FeedbackRequest request =
                 FeedbackRequest.builder()

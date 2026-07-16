@@ -15,7 +15,6 @@
  */
 package io.agentscope.extensions.sandbox.kubernetes;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.agentscope.harness.agent.sandbox.Sandbox;
 import io.agentscope.harness.agent.sandbox.SandboxClient;
 import io.agentscope.harness.agent.sandbox.SandboxException;
@@ -28,175 +27,178 @@ import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
-/** {@link SandboxClient} for Kubernetes Pods. */
+/**
+ * {@link SandboxClient} for Kubernetes Pods.
+ */
 public class KubernetesSandboxClient implements SandboxClient<KubernetesSandboxClientOptions> {
 
-    private static final Logger log = LoggerFactory.getLogger(KubernetesSandboxClient.class);
+  private static final Logger log = LoggerFactory.getLogger(KubernetesSandboxClient.class);
 
-    private final ObjectMapper objectMapper;
-    private final KubernetesSandboxClientOptions defaultOptions;
+  private final ObjectMapper objectMapper;
+  private final KubernetesSandboxClientOptions defaultOptions;
 
-    public KubernetesSandboxClient() {
-        this(new KubernetesSandboxClientOptions(), null);
+  public KubernetesSandboxClient() {
+    this(new KubernetesSandboxClientOptions(), null);
+  }
+
+  public KubernetesSandboxClient(KubernetesSandboxClientOptions defaultOptions) {
+    this(defaultOptions, null);
+  }
+
+  /**
+   * @param defaultOptions template options merged into each {@link #create} call
+   * @param objectMapper   optional mapper; when null a default mapper is created with harness and
+   *                       Kubernetes Jackson modules
+   */
+  public KubernetesSandboxClient(
+      KubernetesSandboxClientOptions defaultOptions, ObjectMapper objectMapper) {
+    this.defaultOptions =
+        defaultOptions != null ? defaultOptions : new KubernetesSandboxClientOptions();
+    this.objectMapper =
+        objectMapper != null
+            ? objectMapper
+            : JsonMapper.builder()
+                .addModule(new HarnessSandboxJacksonModule())
+                .addModule(new KubernetesHarnessSandboxJacksonModule()).build();
+  }
+
+  @Override
+  public Sandbox create(
+      WorkspaceSpec workspaceSpec,
+      SandboxSnapshotSpec snapshotSpec,
+      KubernetesSandboxClientOptions options) {
+    String sessionId = UUID.randomUUID().toString();
+    KubernetesSandboxClientOptions merged = merge(options);
+
+    KubernetesSandboxState state = new KubernetesSandboxState();
+    state.setSessionId(sessionId);
+    state.setWorkspaceSpec(workspaceSpec);
+    state.setNamespace(merged.getNamespace());
+    state.setContainerName(merged.getContainerName());
+    state.setWorkspaceRoot(merged.getWorkspaceRoot());
+    state.setImage(merged.getImage());
+    state.setPodOwned(true);
+    state.setWorkspaceRootReady(false);
+
+    if (snapshotSpec != null) {
+      state.setSnapshot(snapshotSpec.build(sessionId));
     }
 
-    public KubernetesSandboxClient(KubernetesSandboxClientOptions defaultOptions) {
-        this(defaultOptions, null);
+    KubernetesClient kc = resolveClient(merged);
+    Fabric8KubernetesPodRuntime runtime = new Fabric8KubernetesPodRuntime(kc, merged);
+    log.debug(
+        "[sandbox-k8s] Creating sandbox sessionId={} ns={}",
+        sessionId,
+        state.getNamespace());
+    return new KubernetesSandbox(state, runtime);
+  }
+
+  @Override
+  public Sandbox resume(SandboxState state) {
+    if (!(state instanceof KubernetesSandboxState k8s)) {
+      throw new IllegalArgumentException(
+          "Expected KubernetesSandboxState but got: " + state.getClass().getName());
     }
+    KubernetesSandboxClientOptions merged = merge(null);
+    KubernetesClient kc = resolveClient(merged);
+    Fabric8KubernetesPodRuntime runtime = new Fabric8KubernetesPodRuntime(kc, merged);
+    return new KubernetesSandbox(k8s, runtime);
+  }
 
-    /**
-     * @param defaultOptions template options merged into each {@link #create} call
-     * @param objectMapper optional mapper; when null a default mapper is created with harness and
-     *     Kubernetes Jackson modules
-     */
-    public KubernetesSandboxClient(
-            KubernetesSandboxClientOptions defaultOptions, ObjectMapper objectMapper) {
-        this.defaultOptions =
-                defaultOptions != null ? defaultOptions : new KubernetesSandboxClientOptions();
-        this.objectMapper =
-                objectMapper != null
-                        ? objectMapper
-                        : new ObjectMapper()
-                                .findAndRegisterModules()
-                                .registerModule(new HarnessSandboxJacksonModule())
-                                .registerModule(new KubernetesHarnessSandboxJacksonModule());
+  @Override
+  public void delete(Sandbox sandbox) {
+    // shutdown performs deletion for owned pods
+  }
+
+  @Override
+  public String serializeState(SandboxState state) {
+    try {
+      return objectMapper.writeValueAsString(state);
+    } catch (Exception e) {
+      throw new SandboxException.SandboxConfigurationException(
+          "Failed to serialize Kubernetes sandbox state", e);
     }
+  }
 
-    @Override
-    public Sandbox create(
-            WorkspaceSpec workspaceSpec,
-            SandboxSnapshotSpec snapshotSpec,
-            KubernetesSandboxClientOptions options) {
-        String sessionId = UUID.randomUUID().toString();
-        KubernetesSandboxClientOptions merged = merge(options);
-
-        KubernetesSandboxState state = new KubernetesSandboxState();
-        state.setSessionId(sessionId);
-        state.setWorkspaceSpec(workspaceSpec);
-        state.setNamespace(merged.getNamespace());
-        state.setContainerName(merged.getContainerName());
-        state.setWorkspaceRoot(merged.getWorkspaceRoot());
-        state.setImage(merged.getImage());
-        state.setPodOwned(true);
-        state.setWorkspaceRootReady(false);
-
-        if (snapshotSpec != null) {
-            state.setSnapshot(snapshotSpec.build(sessionId));
-        }
-
-        KubernetesClient kc = resolveClient(merged);
-        Fabric8KubernetesPodRuntime runtime = new Fabric8KubernetesPodRuntime(kc, merged);
-        log.debug(
-                "[sandbox-k8s] Creating sandbox sessionId={} ns={}",
-                sessionId,
-                state.getNamespace());
-        return new KubernetesSandbox(state, runtime);
+  @Override
+  public SandboxState deserializeState(String json) {
+    try {
+      return objectMapper.readValue(json, SandboxState.class);
+    } catch (Exception e) {
+      throw new SandboxException.SandboxConfigurationException(
+          "Failed to deserialize Kubernetes sandbox state", e);
     }
+  }
 
-    @Override
-    public Sandbox resume(SandboxState state) {
-        if (!(state instanceof KubernetesSandboxState k8s)) {
-            throw new IllegalArgumentException(
-                    "Expected KubernetesSandboxState but got: " + state.getClass().getName());
-        }
-        KubernetesSandboxClientOptions merged = merge(null);
-        KubernetesClient kc = resolveClient(merged);
-        Fabric8KubernetesPodRuntime runtime = new Fabric8KubernetesPodRuntime(kc, merged);
-        return new KubernetesSandbox(k8s, runtime);
+  private KubernetesSandboxClientOptions merge(KubernetesSandboxClientOptions callOptions) {
+    KubernetesSandboxClientOptions base =
+        defaultOptions != null ? defaultOptions : new KubernetesSandboxClientOptions();
+    if (callOptions == null) {
+      return copy(base);
     }
+    KubernetesSandboxClientOptions o = copy(base);
+    if (callOptions.getKubernetesClient() != null) {
+      o.setKubernetesClient(callOptions.getKubernetesClient());
+    }
+    if (callOptions.getKubernetesConfig() != null) {
+      o.setKubernetesConfig(callOptions.getKubernetesConfig());
+    }
+    if (callOptions.getNamespace() != null) {
+      o.setNamespace(callOptions.getNamespace());
+    }
+    if (callOptions.getImage() != null) {
+      o.setImage(callOptions.getImage());
+    }
+    if (callOptions.getContainerName() != null) {
+      o.setContainerName(callOptions.getContainerName());
+    }
+    if (callOptions.getWorkspaceRoot() != null) {
+      o.setWorkspaceRoot(callOptions.getWorkspaceRoot());
+    }
+    if (callOptions.getServiceAccount() != null) {
+      o.setServiceAccount(callOptions.getServiceAccount());
+    }
+    if (callOptions.getNodeSelector() != null && !callOptions.getNodeSelector().isEmpty()) {
+      o.setNodeSelector(callOptions.getNodeSelector());
+    }
+    if (callOptions.getPodLabels() != null && !callOptions.getPodLabels().isEmpty()) {
+      o.setPodLabels(callOptions.getPodLabels());
+    }
+    if (callOptions.getCpuRequest() != null) {
+      o.setCpuRequest(callOptions.getCpuRequest());
+    }
+    if (callOptions.getMemoryRequest() != null) {
+      o.setMemoryRequest(callOptions.getMemoryRequest());
+    }
+    return o;
+  }
 
-    @Override
-    public void delete(Sandbox sandbox) {
-        // shutdown performs deletion for owned pods
-    }
+  private static KubernetesSandboxClientOptions copy(KubernetesSandboxClientOptions src) {
+    KubernetesSandboxClientOptions o = new KubernetesSandboxClientOptions();
+    o.setKubernetesClient(src.getKubernetesClient());
+    o.setKubernetesConfig(src.getKubernetesConfig());
+    o.setNamespace(src.getNamespace());
+    o.setImage(src.getImage());
+    o.setContainerName(src.getContainerName());
+    o.setWorkspaceRoot(src.getWorkspaceRoot());
+    o.setServiceAccount(src.getServiceAccount());
+    o.setNodeSelector(src.getNodeSelector());
+    o.setPodLabels(src.getPodLabels());
+    o.setCpuRequest(src.getCpuRequest());
+    o.setMemoryRequest(src.getMemoryRequest());
+    return o;
+  }
 
-    @Override
-    public String serializeState(SandboxState state) {
-        try {
-            return objectMapper.writeValueAsString(state);
-        } catch (Exception e) {
-            throw new SandboxException.SandboxConfigurationException(
-                    "Failed to serialize Kubernetes sandbox state", e);
-        }
+  private static KubernetesClient resolveClient(KubernetesSandboxClientOptions merged) {
+    if (merged.getKubernetesClient() != null) {
+      return merged.getKubernetesClient();
     }
-
-    @Override
-    public SandboxState deserializeState(String json) {
-        try {
-            return objectMapper.readValue(json, SandboxState.class);
-        } catch (Exception e) {
-            throw new SandboxException.SandboxConfigurationException(
-                    "Failed to deserialize Kubernetes sandbox state", e);
-        }
+    if (merged.getKubernetesConfig() != null) {
+      return new KubernetesClientBuilder().withConfig(merged.getKubernetesConfig()).build();
     }
-
-    private KubernetesSandboxClientOptions merge(KubernetesSandboxClientOptions callOptions) {
-        KubernetesSandboxClientOptions base =
-                defaultOptions != null ? defaultOptions : new KubernetesSandboxClientOptions();
-        if (callOptions == null) {
-            return copy(base);
-        }
-        KubernetesSandboxClientOptions o = copy(base);
-        if (callOptions.getKubernetesClient() != null) {
-            o.setKubernetesClient(callOptions.getKubernetesClient());
-        }
-        if (callOptions.getKubernetesConfig() != null) {
-            o.setKubernetesConfig(callOptions.getKubernetesConfig());
-        }
-        if (callOptions.getNamespace() != null) {
-            o.setNamespace(callOptions.getNamespace());
-        }
-        if (callOptions.getImage() != null) {
-            o.setImage(callOptions.getImage());
-        }
-        if (callOptions.getContainerName() != null) {
-            o.setContainerName(callOptions.getContainerName());
-        }
-        if (callOptions.getWorkspaceRoot() != null) {
-            o.setWorkspaceRoot(callOptions.getWorkspaceRoot());
-        }
-        if (callOptions.getServiceAccount() != null) {
-            o.setServiceAccount(callOptions.getServiceAccount());
-        }
-        if (callOptions.getNodeSelector() != null && !callOptions.getNodeSelector().isEmpty()) {
-            o.setNodeSelector(callOptions.getNodeSelector());
-        }
-        if (callOptions.getPodLabels() != null && !callOptions.getPodLabels().isEmpty()) {
-            o.setPodLabels(callOptions.getPodLabels());
-        }
-        if (callOptions.getCpuRequest() != null) {
-            o.setCpuRequest(callOptions.getCpuRequest());
-        }
-        if (callOptions.getMemoryRequest() != null) {
-            o.setMemoryRequest(callOptions.getMemoryRequest());
-        }
-        return o;
-    }
-
-    private static KubernetesSandboxClientOptions copy(KubernetesSandboxClientOptions src) {
-        KubernetesSandboxClientOptions o = new KubernetesSandboxClientOptions();
-        o.setKubernetesClient(src.getKubernetesClient());
-        o.setKubernetesConfig(src.getKubernetesConfig());
-        o.setNamespace(src.getNamespace());
-        o.setImage(src.getImage());
-        o.setContainerName(src.getContainerName());
-        o.setWorkspaceRoot(src.getWorkspaceRoot());
-        o.setServiceAccount(src.getServiceAccount());
-        o.setNodeSelector(src.getNodeSelector());
-        o.setPodLabels(src.getPodLabels());
-        o.setCpuRequest(src.getCpuRequest());
-        o.setMemoryRequest(src.getMemoryRequest());
-        return o;
-    }
-
-    private static KubernetesClient resolveClient(KubernetesSandboxClientOptions merged) {
-        if (merged.getKubernetesClient() != null) {
-            return merged.getKubernetesClient();
-        }
-        if (merged.getKubernetesConfig() != null) {
-            return new KubernetesClientBuilder().withConfig(merged.getKubernetesConfig()).build();
-        }
-        return new KubernetesClientBuilder().build();
-    }
+    return new KubernetesClientBuilder().build();
+  }
 }

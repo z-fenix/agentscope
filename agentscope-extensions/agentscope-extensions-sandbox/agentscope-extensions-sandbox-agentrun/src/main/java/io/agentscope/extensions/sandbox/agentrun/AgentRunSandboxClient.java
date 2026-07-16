@@ -15,7 +15,7 @@
  */
 package io.agentscope.extensions.sandbox.agentrun;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.harness.agent.sandbox.Sandbox;
 import io.agentscope.harness.agent.sandbox.SandboxClient;
 import io.agentscope.harness.agent.sandbox.SandboxException;
@@ -28,6 +28,7 @@ import java.security.MessageDigest;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 /** {@link SandboxClient} for Alibaba Cloud AgentRun. */
 public class AgentRunSandboxClient implements SandboxClient<AgentRunSandboxClientOptions> {
@@ -54,10 +55,9 @@ public class AgentRunSandboxClient implements SandboxClient<AgentRunSandboxClien
         this.objectMapper =
                 objectMapper != null
                         ? objectMapper
-                        : new ObjectMapper()
-                                .findAndRegisterModules()
-                                .registerModule(new HarnessSandboxJacksonModule())
-                                .registerModule(new AgentRunHarnessSandboxJacksonModule());
+                        : JsonMapper.builder()
+                                .addModule(new HarnessSandboxJacksonModule())
+                                .addModule(new AgentRunHarnessSandboxJacksonModule()).build();
     }
 
     @Override

@@ -15,9 +15,10 @@
  */
 package io.agentscope.harness.agent.skill.curator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.datatype.jsr310.JavaTimeModule;
 import io.agentscope.core.agent.RuntimeContext;
 import io.agentscope.harness.agent.workspace.WorkspaceManager;
 import java.time.Duration;
@@ -41,10 +42,9 @@ public class NotifyAndWaitGate implements SkillPromotionGate {
     private static final Logger log = LoggerFactory.getLogger(NotifyAndWaitGate.class);
 
     private static final ObjectMapper JSON =
-            new ObjectMapper()
-                    .registerModule(new JavaTimeModule())
-                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                    .enable(SerializationFeature.INDENT_OUTPUT);
+        JsonMapper.builder()
+                    .addModule(new JavaTimeModule())
+                    .enable(SerializationFeature.INDENT_OUTPUT).build();
 
     private final List<NotificationSink> sinks;
     private final WorkspaceManager workspaceManager;

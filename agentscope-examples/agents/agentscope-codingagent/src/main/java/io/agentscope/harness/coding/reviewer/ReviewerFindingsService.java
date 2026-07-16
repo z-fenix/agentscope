@@ -15,7 +15,7 @@
  */
 package io.agentscope.harness.coding.reviewer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.agentscope.harness.agent.filesystem.remote.store.BaseStore;
 import io.agentscope.harness.agent.filesystem.remote.store.StoreItem;
 import io.agentscope.harness.coding.observability.CodingAgentMetrics;

@@ -22,6 +22,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import org.a2aproject.sdk.server.agentexecution.AgentExecutor;
 import org.a2aproject.sdk.server.events.InMemoryQueueManager;
+import org.a2aproject.sdk.server.events.MainEventBus;
+import org.a2aproject.sdk.server.events.MainEventBusProcessor;
 import org.a2aproject.sdk.server.events.QueueManager;
 import org.a2aproject.sdk.server.requesthandlers.DefaultRequestHandler;
 import org.a2aproject.sdk.server.requesthandlers.RequestHandler;
@@ -40,136 +42,140 @@ import org.jspecify.annotations.NonNull;
  */
 public class AgentScopeA2aRequestHandler extends DefaultRequestHandler implements RequestHandler {
 
-    private AgentScopeA2aRequestHandler(
-            AgentExecutor agentExecutor,
-            TaskStore taskStore,
-            QueueManager queueManager,
-            PushNotificationConfigStore pushConfigStore,
-            PushNotificationSender pushSender,
-            Executor executor) {
-        super(agentExecutor, taskStore, queueManager, pushConfigStore, pushSender, executor);
+  private MainEventBus mainEventBus;
+
+  private AgentScopeA2aRequestHandler(AgentExecutor agentExecutor, TaskStore taskStore,
+      QueueManager queueManager, PushNotificationConfigStore pushConfigStore,
+      MainEventBusProcessor eventBusProcessor, Executor executor) {
+    super(agentExecutor, taskStore, queueManager, pushConfigStore, eventBusProcessor, executor,
+        executor);
+
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+
+    private AgentExecutor agentExecutor;
+
+    private TaskStore taskStore;
+
+    private QueueManager queueManager;
+
+    private PushNotificationConfigStore pushConfigStore;
+
+    private MainEventBusProcessor eventBusProcessor;
+
+    private PushNotificationSender pushSender;
+
+    public Builder agentExecutor(AgentExecutor agentExecutor) {
+      this.agentExecutor = agentExecutor;
+      return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Builder taskStore(TaskStore taskStore) {
+      this.taskStore = taskStore;
+      return this;
     }
 
-    public static class Builder {
-
-        private AgentExecutor agentExecutor;
-
-        private TaskStore taskStore;
-
-        private QueueManager queueManager;
-
-        private PushNotificationConfigStore pushConfigStore;
-
-        private PushNotificationSender pushSender;
-
-        public Builder agentExecutor(AgentExecutor agentExecutor) {
-            this.agentExecutor = agentExecutor;
-            return this;
-        }
-
-        public Builder taskStore(TaskStore taskStore) {
-            this.taskStore = taskStore;
-            return this;
-        }
-
-        public Builder queueManager(QueueManager queueManager) {
-            this.queueManager = queueManager;
-            return this;
-        }
-
-        public Builder pushConfigStore(PushNotificationConfigStore pushConfigStore) {
-            this.pushConfigStore = pushConfigStore;
-            return this;
-        }
-
-        public Builder pushSender(PushNotificationSender pushSender) {
-            this.pushSender = pushSender;
-            return this;
-        }
-
-        public AgentScopeA2aRequestHandler build() {
-            if (null == agentExecutor) {
-                throw new IllegalArgumentException("AgentExecutor is required.");
-            }
-            if (null == taskStore) {
-                taskStore = new InMemoryTaskStore();
-            }
-            if (null == queueManager) {
-                if (taskStore instanceof InMemoryTaskStore inMemoryTaskStore) {
-                    queueManager = new InMemoryQueueManager(inMemoryTaskStore);
-                } else {
-                    queueManager =
-                            new InMemoryQueueManager(new AgentScopeTaskStateProvider(taskStore));
-                }
-            }
-            if (null == pushConfigStore) {
-                pushConfigStore = new InMemoryPushNotificationConfigStore();
-            }
-            if (null == pushSender) {
-                pushSender = new BasePushNotificationSender(pushConfigStore);
-            }
-            AgentScopeA2aRequestHandler result =
-                    new AgentScopeA2aRequestHandler(
-                            agentExecutor,
-                            taskStore,
-                            queueManager,
-                            pushConfigStore,
-                            pushSender,
-                            // TODO support custom executor.
-                            Executors.newCachedThreadPool());
-            setTimeoutProperties(result);
-            return result;
-        }
-
-        /**
-         * A2A Server Request Handler don't provider configurable way to set timeout. So temp use reflection to do.
-         *
-         * <p>
-         * If no timeout property setting, the blocking A2A request will return innerError immediately.
-         * </p>
-         */
-        private static void setTimeoutProperties(DefaultRequestHandler requestHandler) {
-            // TODO support config timeout properties by user input properties.
-            try {
-                Field field =
-                        DefaultRequestHandler.class.getDeclaredField(
-                                "agentCompletionTimeoutSeconds");
-                field.setAccessible(true);
-                field.set(requestHandler, 60);
-                field =
-                        DefaultRequestHandler.class.getDeclaredField(
-                                "consumptionCompletionTimeoutSeconds");
-                field.setAccessible(true);
-                field.set(requestHandler, 10);
-            } catch (Exception ignored) {
-            }
-        }
+    public Builder queueManager(QueueManager queueManager) {
+      this.queueManager = queueManager;
+      return this;
     }
 
-    private record AgentScopeTaskStateProvider(TaskStore taskStore) implements TaskStateProvider {
-
-        @Override
-        public boolean isTaskActive(String taskId) {
-            Task task = taskStore.get(taskId);
-            if (task == null) {
-                return false;
-            }
-            // Task is active if not in final state
-            return !task.status().state().isFinal();
-        }
-
-        @Override
-        public boolean isTaskFinalized(@NonNull String taskId) {
-            Task task = taskStore.get(taskId);
-            if (task == null) {
-                return false;
-            }
-            // Task is finalized if in final state (ignores grace period)
-            return task.status().state().isFinal();
-        }
+    public Builder pushConfigStore(PushNotificationConfigStore pushConfigStore) {
+      this.pushConfigStore = pushConfigStore;
+      return this;
     }
+
+    public Builder pushSender(PushNotificationSender pushSender) {
+      this.pushSender = pushSender;
+      return this;
+    }
+
+    public Builder eventBusProcessor(MainEventBusProcessor eventBusProcessor) {
+      this.eventBusProcessor = eventBusProcessor;
+      return this;
+    }
+
+    public AgentScopeA2aRequestHandler build() {
+      if (null == agentExecutor) {
+        throw new IllegalArgumentException("AgentExecutor is required.");
+      }
+      if (null == taskStore) {
+        taskStore = new InMemoryTaskStore();
+      }
+      MainEventBus mainEventBus = new MainEventBus();
+      if (null == queueManager) {
+        if (taskStore instanceof InMemoryTaskStore inMemoryTaskStore) {
+          queueManager = new InMemoryQueueManager(inMemoryTaskStore, mainEventBus);
+        } else {
+          queueManager = new InMemoryQueueManager(new AgentScopeTaskStateProvider(taskStore),
+              mainEventBus);
+        }
+      }
+      if (null == pushConfigStore) {
+        pushConfigStore = new InMemoryPushNotificationConfigStore();
+      }
+      if (null == pushSender) {
+        pushSender = new BasePushNotificationSender(pushConfigStore);
+      }
+      if (null == eventBusProcessor) {
+        eventBusProcessor = new MainEventBusProcessor(mainEventBus, taskStore, pushSender,
+            queueManager);
+      }
+      AgentScopeA2aRequestHandler result = new AgentScopeA2aRequestHandler(agentExecutor, taskStore,
+          queueManager, pushConfigStore, eventBusProcessor,
+          // TODO support custom executor.
+          Executors.newCachedThreadPool());
+      setTimeoutProperties(result);
+      return result;
+    }
+
+    /**
+     * A2A Server Request Handler don't provider configurable way to set timeout. So temp use
+     * reflection to do.
+     *
+     * <p>
+     * If no timeout property setting, the blocking A2A request will return innerError immediately.
+     * </p>
+     */
+    private static void setTimeoutProperties(DefaultRequestHandler requestHandler) {
+      // TODO support config timeout properties by user input properties.
+      try {
+        Field field = DefaultRequestHandler.class.getDeclaredField("agentCompletionTimeoutSeconds");
+        field.setAccessible(true);
+        field.set(requestHandler, 60);
+        field = DefaultRequestHandler.class.getDeclaredField("consumptionCompletionTimeoutSeconds");
+        field.setAccessible(true);
+        field.set(requestHandler, 10);
+      } catch (Exception ignored) {
+      }
+    }
+  }
+
+  private record AgentScopeTaskStateProvider(TaskStore taskStore) implements TaskStateProvider {
+
+    @Override
+    public boolean isTaskActive(String taskId) {
+      Task task = taskStore.get(taskId);
+      if (task == null) {
+        return false;
+      }
+      // Task is active if not in final state
+      return !task.status().state().isFinal();
+    }
+
+    @Override
+    public boolean isTaskFinalized(@NonNull String taskId) {
+      Task task = taskStore.get(taskId);
+      if (task == null) {
+        return false;
+      }
+      // Task is finalized if in final state (ignores grace period)
+      return task.status().state().isFinal();
+    }
+  }
 }

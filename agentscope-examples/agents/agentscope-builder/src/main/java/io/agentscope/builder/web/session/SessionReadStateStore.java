@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Per-user, per-session "last read at" tracker, used by the Threads inbox to derive an unread flag.
@@ -46,7 +47,7 @@ public class SessionReadStateStore {
 
     private static final Logger log = LoggerFactory.getLogger(SessionReadStateStore.class);
     private static final ObjectMapper MAPPER =
-            new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+            JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
     private final Path stateFile;
     private final Map<String, Long> lastReadAt = new ConcurrentHashMap<>();

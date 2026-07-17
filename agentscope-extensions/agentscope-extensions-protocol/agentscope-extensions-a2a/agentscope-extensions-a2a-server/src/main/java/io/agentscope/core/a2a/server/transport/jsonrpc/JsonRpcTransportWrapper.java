@@ -46,7 +46,7 @@ import reactor.core.publisher.Flux;
  * <ul>
  *     <li>deserialize request body to JSON-RPC request.</li>
  *     <li>judge whether the request is streaming request.</li>
- *     <li>build {@link io.a2a.server.ServerCallContext} from JSON-RPC method, headers and all metadata.</li>
+ *     <li>build {@link ServerCallContext} from JSON-RPC method, headers and all metadata.</li>
  *     <li>handle error and exception for JSON-RPC request handle.</li>
  * </ul>
  */

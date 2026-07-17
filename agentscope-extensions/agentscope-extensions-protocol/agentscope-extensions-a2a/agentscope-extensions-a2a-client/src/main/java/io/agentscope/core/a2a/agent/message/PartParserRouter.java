@@ -16,31 +16,35 @@
 
 package io.agentscope.core.a2a.agent.message;
 
-import io.a2a.spec.DataPart;
-import io.a2a.spec.FilePart;
-import io.a2a.spec.Part;
-import io.a2a.spec.TextPart;
+
 import io.agentscope.core.message.ContentBlock;
+import org.a2aproject.sdk.spec.DataPart;
+import org.a2aproject.sdk.spec.FilePart;
+import org.a2aproject.sdk.spec.Part;
+import org.a2aproject.sdk.spec.TextPart;
 
 /**
- * The router for {@link PartParser} according to the {@link Part#getKind()}.
+ * The router for {@link PartParser} according to the .
  */
 public class PartParserRouter {
 
-    /**
-     * Parse {@link Part} to {@link ContentBlock}.
-     *
-     * @param part the part to parse
-     * @return the parsed content block, or null if the part is null or not supported
-     */
-    public ContentBlock parse(Part<?> part) {
-        if (null == part) {
-            return null;
-        }
-        return switch (part.getKind()) {
-            case TEXT -> new TextPartParser().parse((TextPart) part);
-            case FILE -> new FilePartParser().parse((FilePart) part);
-            case DATA -> new DataPartParser().parse((DataPart) part);
-        };
+  /**
+   * Parse {@link Part} to {@link ContentBlock}.
+   *
+   * @param part the part to parse
+   * @return the parsed content block, or null if the part is null or not supported
+   */
+  public ContentBlock parse(Part<?> part) {
+    if (null == part) {
+      return null;
     }
+    if (part instanceof TextPart textPart) {
+      return new TextPartParser().parse(textPart);
+    } else if (part instanceof DataPart dataPart) {
+      return new DataPartParser().parse(dataPart);
+    } else if (part instanceof FilePart filePart) {
+      return new FilePartParser().parse(filePart);
+    }
+    return null;
+  }
 }

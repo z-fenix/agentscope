@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.agentscope.dataagent.runtime.DataAgentBootstrap;
 import io.agentscope.harness.agent.gateway.channel.ChannelBinding;
 import io.agentscope.harness.agent.gateway.channel.ChannelConfig;
+import io.agentscope.harness.agent.gateway.channel.ChannelFactory;
 import io.agentscope.harness.agent.gateway.channel.DmScope;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
